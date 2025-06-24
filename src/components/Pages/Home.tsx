@@ -147,7 +147,7 @@ export default function Home({ onNavigate }: HomeProps) {
       <section 
         className="relative py-32 px-4 text-center min-h-screen flex items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/refs/heads/main/public/images/hero_image.png?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://raw.githubusercontent.com/vinuthm3190/iccwsc-cricket-club/refs/heads/main/public/images/hero_image.png?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
