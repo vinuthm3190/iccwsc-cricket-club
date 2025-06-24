@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Shield, Users, UserPlus, Edit3, Trash2, Save, X, CheckCircle, AlertTriangle, Crown, Star, User, Trophy, Search, Filter } from 'lucide-react';
+import { Shield, Users, UserPlus, Edit3, Trash2, Save, X, CheckCircle, AlertTriangle, Crown, Star, User, Trophy, Search, Filter, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface UserAccount {
   id: string;
   username: string;
+  password: string;
   name: string;
   email: string;
   role: 'member' | 'vice' | 'captain';
@@ -33,6 +34,13 @@ interface PlayerFilters {
   teamName: string;
   league: string;
   category: string;
+}
+
+interface NewUserData {
+  username: string;
+  password: string;
+  confirmPassword: string;
+  role: 'member' | 'vice' | 'captain';
 }
 
 export default function Admin() {
@@ -333,6 +341,7 @@ export default function Admin() {
     {
       id: '1',
       username: 'naim.mohammad',
+      password: 'cricket123',
       name: 'Naim Mohammad',
       email: 'naim.mohammad@email.com',
       role: 'captain',
@@ -344,6 +353,7 @@ export default function Admin() {
     {
       id: '2',
       username: 'priya.sharma',
+      password: 'cricket123',
       name: 'Priya Sharma',
       email: 'priya.sharma@email.com',
       role: 'vice',
@@ -355,6 +365,7 @@ export default function Admin() {
     {
       id: '3',
       username: 'vikram.singh',
+      password: 'cricket123',
       name: 'Vikram Singh',
       email: 'vikram.singh@email.com',
       role: 'member',
@@ -369,9 +380,17 @@ export default function Admin() {
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<ExistingPlayer | null>(null);
+  const [newUserData, setNewUserData] = useState<NewUserData>({
+    username: '',
+    password: '',
+    confirmPassword: '',
+    role: 'member'
+  });
   const [editUser, setEditUser] = useState<Partial<UserAccount>>({});
   const [filterRole, setFilterRole] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Player filters for the selection modal
   const [playerFilters, setPlayerFilters] = useState<PlayerFilters>({
@@ -442,37 +461,69 @@ export default function Admin() {
 
   const handlePlayerSelect = (player: ExistingPlayer) => {
     setSelectedPlayer(player);
+    // Auto-generate username from player name
+    const username = player.name.toLowerCase().replace(/\s+/g, '.');
+    setNewUserData(prev => ({
+      ...prev,
+      username: username,
+      password: 'cricket123', // Default password
+      confirmPassword: 'cricket123'
+    }));
   };
 
-  const handleCreateUserFromPlayer = (role: 'member' | 'vice' | 'captain') => {
+  const validateUserForm = () => {
     if (!selectedPlayer) {
       alert('Please select a player first.');
-      return;
+      return false;
     }
 
-    // Check if user already exists
-    if (userAccounts.some(user => user.name === selectedPlayer.name)) {
-      alert('A user account already exists for this player.');
-      return;
+    if (!newUserData.username.trim()) {
+      alert('Please enter a username.');
+      return false;
     }
 
-    // Generate username from name
-    const username = selectedPlayer.name.toLowerCase().replace(/\s+/g, '.');
+    if (!newUserData.password.trim()) {
+      alert('Please enter a password.');
+      return false;
+    }
+
+    if (newUserData.password !== newUserData.confirmPassword) {
+      alert('Passwords do not match.');
+      return false;
+    }
+
+    if (newUserData.password.length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return false;
+    }
 
     // Check if username already exists
-    if (userAccounts.some(user => user.username === username)) {
-      alert('Username already exists. Please create manually with a different username.');
-      return;
+    if (userAccounts.some(user => user.username === newUserData.username)) {
+      alert('Username already exists. Please choose a different username.');
+      return false;
     }
+
+    // Check if user already exists for this player
+    if (userAccounts.some(user => user.name === selectedPlayer.name)) {
+      alert('A user account already exists for this player.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleCreateUser = () => {
+    if (!validateUserForm()) return;
 
     const userAccount: UserAccount = {
       id: Date.now().toString(),
-      username: username,
-      name: selectedPlayer.name,
-      email: selectedPlayer.email || `${username}@email.com`,
-      role: role,
+      username: newUserData.username,
+      password: newUserData.password,
+      name: selectedPlayer!.name,
+      email: selectedPlayer!.email || `${newUserData.username}@email.com`,
+      role: newUserData.role,
       status: 'active',
-      teamName: selectedPlayer.teamName,
+      teamName: selectedPlayer!.teamName,
       createdAt: new Date()
     };
 
@@ -481,6 +532,12 @@ export default function Admin() {
     
     setShowAddUserModal(false);
     setSelectedPlayer(null);
+    setNewUserData({
+      username: '',
+      password: '',
+      confirmPassword: '',
+      role: 'member'
+    });
     setPlayerFilters({
       search: '',
       teamName: '',
@@ -488,7 +545,7 @@ export default function Admin() {
       category: ''
     });
 
-    alert(`User account created for "${userAccount.name}" with ${role} permissions and assigned to team "${userAccount.teamName}"!`);
+    alert(`User account created for "${userAccount.name}" with ${userAccount.role} permissions!\n\nLogin Details:\nUsername: ${userAccount.username}\nPassword: ${userAccount.password}`);
   };
 
   const handleEditUser = (user: UserAccount) => {
@@ -496,6 +553,8 @@ export default function Admin() {
     setEditUser({
       name: user.name,
       email: user.email,
+      username: user.username,
+      password: user.password,
       role: user.role,
       status: user.status,
       teamName: user.teamName
@@ -504,7 +563,7 @@ export default function Admin() {
   };
 
   const handleUpdateUser = () => {
-    if (!selectedUser || !editUser.name || !editUser.email) {
+    if (!selectedUser || !editUser.name || !editUser.email || !editUser.username) {
       alert('Please fill in all required fields.');
       return;
     }
@@ -512,6 +571,13 @@ export default function Admin() {
     // Validate team assignment for captains and vice captains
     if ((editUser.role === 'captain' || editUser.role === 'vice') && !editUser.teamName) {
       alert(`Please assign a team for the ${editUser.role === 'vice' ? 'vice captain' : 'captain'}.`);
+      return;
+    }
+
+    // Check if username is unique (excluding current user)
+    if (editUser.username !== selectedUser.username && 
+        userAccounts.some(user => user.username === editUser.username)) {
+      alert('Username already exists. Please choose a different username.');
       return;
     }
 
@@ -761,16 +827,12 @@ export default function Admin() {
                         <div>{userAccount.lastLogin?.toLocaleDateString() || 'Never'}</div>
                       </div>
                       <div>
-                        <span className="font-semibold">Permissions:</span>
-                        <div>
-                          {userAccount.role === 'captain' && 'Full Access'}
-                          {userAccount.role === 'vice' && 'Team Management'}
-                          {userAccount.role === 'member' && 'Basic Access'}
-                        </div>
+                        <span className="font-semibold">Username:</span>
+                        <div className="font-mono">{userAccount.username}</div>
                       </div>
                       <div>
-                        <span className="font-semibold">Account ID:</span>
-                        <div className="font-mono text-xs">{userAccount.id}</div>
+                        <span className="font-semibold">Password:</span>
+                        <div className="font-mono">••••••••</div>
                       </div>
                     </div>
                   </div>
@@ -882,11 +944,11 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Role Assignment */}
+                {/* User Account Creation */}
                 <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
                   <h4 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                     <Shield size={20} />
-                    <span>Assign Role & Create Account</span>
+                    <span>Create User Account</span>
                   </h4>
                   
                   {selectedPlayer ? (
@@ -907,59 +969,98 @@ export default function Admin() {
                         </div>
                       </div>
 
+                      {/* User Account Details */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-white/90 mb-2">Username *</label>
+                          <input
+                            type="text"
+                            value={newUserData.username}
+                            onChange={(e) => setNewUserData({ ...newUserData, username: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                            placeholder="Enter username"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-white/90 mb-2">Password *</label>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              value={newUserData.password}
+                              onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                              className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 pr-12"
+                              placeholder="Enter password"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                            >
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-white/90 mb-2">Confirm Password *</label>
+                          <div className="relative">
+                            <input
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              value={newUserData.confirmPassword}
+                              onChange={(e) => setNewUserData({ ...newUserData, confirmPassword: e.target.value })}
+                              className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 pr-12"
+                              placeholder="Confirm password"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                            >
+                              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-white/90 mb-2">Role *</label>
+                          <select
+                            value={newUserData.role}
+                            onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value as 'member' | 'vice' | 'captain' })}
+                            className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          >
+                            <option value="member" className="bg-gray-900">Member</option>
+                            <option value="vice" className="bg-gray-900">Vice Captain</option>
+                            <option value="captain" className="bg-gray-900">Captain</option>
+                          </select>
+                        </div>
+                      </div>
+
                       {/* Account Preview */}
                       <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4">
                         <h5 className="text-white font-semibold mb-2">Account Preview</h5>
                         <div className="text-blue-200 text-sm space-y-1">
-                          <div><strong>Username:</strong> {selectedPlayer.name.toLowerCase().replace(/\s+/g, '.')}</div>
-                          <div><strong>Email:</strong> {selectedPlayer.email || `${selectedPlayer.name.toLowerCase().replace(/\s+/g, '.')}@email.com`}</div>
-                          <div><strong>Team Assignment:</strong> {selectedPlayer.teamName}</div>
+                          <div><strong>Name:</strong> {selectedPlayer.name}</div>
+                          <div><strong>Username:</strong> {newUserData.username}</div>
+                          <div><strong>Email:</strong> {selectedPlayer.email || `${newUserData.username}@email.com`}</div>
+                          <div><strong>Role:</strong> {newUserData.role.charAt(0).toUpperCase() + newUserData.role.slice(1)}</div>
+                          <div><strong>Team:</strong> {selectedPlayer.teamName}</div>
                         </div>
                       </div>
 
-                      {/* Role Selection */}
-                      <div className="space-y-4">
-                        <h5 className="text-white font-semibold">Select Role for User Account</h5>
-                        
-                        <button
-                          onClick={() => handleCreateUserFromPlayer('member')}
-                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
-                        >
-                          <User size={20} />
-                          <div className="text-left">
-                            <div>Create as Member</div>
-                            <div className="text-sm opacity-80">Basic access to scheduler and team info</div>
-                          </div>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleCreateUserFromPlayer('vice')}
-                          className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-xl font-semibold hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
-                        >
-                          <Star size={20} />
-                          <div className="text-left">
-                            <div>Create as Vice Captain</div>
-                            <div className="text-sm opacity-80">Team picker access and player management</div>
-                          </div>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleCreateUserFromPlayer('captain')}
-                          className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white p-4 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
-                        >
-                          <Crown size={20} />
-                          <div className="text-left">
-                            <div>Create as Captain</div>
-                            <div className="text-sm opacity-80">Full team management and event creation</div>
-                          </div>
-                        </button>
-                      </div>
+                      <button
+                        onClick={handleCreateUser}
+                        className="w-full bg-gradient-to-r from-orange-500 to-green-600 text-white p-4 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-[1.02] flex items-center justify-center space-x-2"
+                      >
+                        <UserPlus size={20} />
+                        <span>Create User Account</span>
+                      </button>
                     </div>
                   ) : (
                     <div className="text-center py-12 text-white/50">
                       <Users size={48} className="mx-auto mb-4" />
                       <p className="text-lg">Select a cricket player from the list</p>
-                      <p className="text-sm">Choose a player to create their user account with appropriate role</p>
+                      <p className="text-sm">Choose a player to create their user account</p>
                     </div>
                   )}
                 </div>
@@ -970,6 +1071,12 @@ export default function Admin() {
                   onClick={() => {
                     setShowAddUserModal(false);
                     setSelectedPlayer(null);
+                    setNewUserData({
+                      username: '',
+                      password: '',
+                      confirmPassword: '',
+                      role: 'member'
+                    });
                     setPlayerFilters({
                       search: '',
                       teamName: '',
@@ -1017,6 +1124,30 @@ export default function Admin() {
                         onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         placeholder="Enter email address"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Username *</label>
+                      <input
+                        type="text"
+                        value={editUser.username || ''}
+                        onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="Enter username"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Password *</label>
+                      <input
+                        type="text"
+                        value={editUser.password || ''}
+                        onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="Enter password"
                       />
                     </div>
                   </div>
