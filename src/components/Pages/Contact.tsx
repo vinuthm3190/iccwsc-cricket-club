@@ -100,9 +100,16 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16">
+      {/* Hero Section with Handshake Background */}
+      <section 
+        className="relative py-16 px-4 text-center mb-16 rounded-3xl overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.9), rgba(67, 56, 202, 0.9)), url('/A_group_of_aspiring_cricket_players_shaking_hands_.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="relative z-10">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
             Get In
             <span className="bg-gradient-to-r from-orange-400 to-green-400 bg-clip-text text-transparent">
@@ -114,7 +121,9 @@ export default function Contact() {
             We'd love to hear from you and welcome you to the ICCWSC community.
           </p>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto">
         {/* Contact Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {contactInfo.map((info, index) => {
@@ -244,51 +253,69 @@ export default function Contact() {
             </form>
           </div>
           
-          {/* Info Section */}
+          {/* Info Section with Stadium Background */}
           <div className="space-y-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-6">Why Join ICCWSC?</h3>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center mt-1">
-                    <CheckCircle size={16} className="text-white" />
+            <div 
+              className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 relative overflow-hidden"
+              style={{
+                backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.8), rgba(67, 56, 202, 0.8)), url('/A_professional_cricket_stadium_at_sunset,_with_bri.png')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold text-white mb-6">Why Join ICCWSC?</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center mt-1">
+                      <CheckCircle size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold">Authentic Cricket Experience</h4>
+                      <p className="text-white/70 text-sm">Play cricket the way it's meant to be played with proper equipment and grounds.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-white font-semibold">Authentic Cricket Experience</h4>
-                    <p className="text-white/70 text-sm">Play cricket the way it's meant to be played with proper equipment and grounds.</p>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                      <CheckCircle size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold">Cultural Community</h4>
+                      <p className="text-white/70 text-sm">Connect with fellow Indians who share your passion for cricket and culture.</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-1">
-                    <CheckCircle size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-semibold">Cultural Community</h4>
-                    <p className="text-white/70 text-sm">Connect with fellow Indians who share your passion for cricket and culture.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-1">
-                    <CheckCircle size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-semibold">All Skill Levels Welcome</h4>
-                    <p className="text-white/70 text-sm">From beginners to seasoned players, everyone has a place in our cricket family.</p>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-1">
+                      <CheckCircle size={16} className="text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-semibold">All Skill Levels Welcome</h4>
+                      <p className="text-white/70 text-sm">From beginners to seasoned players, everyone has a place in our cricket family.</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-orange-500/20 to-green-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/30">
-              <h3 className="text-2xl font-bold text-white mb-4">Ready to Play Cricket?</h3>
-              <p className="text-white/80 mb-6">
-                Join our cricket community and experience the joy of playing the gentleman's game in the heart of Seattle.
-              </p>
-              <button className="bg-white/20 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors">
-                Join ICCWSC Today
-              </button>
+            <div 
+              className="bg-gradient-to-br from-orange-500/20 to-green-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/30 relative overflow-hidden"
+              style={{
+                backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.7), rgba(67, 56, 202, 0.7)), url('/An_intense_cricket_match_in_progress,_with_a_batsm.png')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold text-white mb-4">Ready to Play Cricket?</h3>
+                <p className="text-white/80 mb-6">
+                  Join our cricket community and experience the joy of playing the gentleman's game in the heart of Seattle.
+                </p>
+                <button className="bg-white/20 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-colors">
+                  Join ICCWSC Today
+                </button>
+              </div>
             </div>
           </div>
         </div>

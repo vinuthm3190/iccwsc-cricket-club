@@ -4,12 +4,13 @@ import Header from './components/Layout/Header';
 import Home from './components/Pages/Home';
 import Teams from './components/Pages/Teams';
 import Players from './components/Pages/Players';
+import Blog from './components/Pages/Blog';
 import Contact from './components/Pages/Contact';
 import Scheduler from './components/Pages/Scheduler';
 import TeamPicker from './components/Pages/TeamPicker';
 import Admin from './components/Pages/Admin';
 import Notifications from './components/Pages/Notifications';
-import Blog from './components/Pages/Blog';
+import DataManagement from './components/Pages/DataManagement';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -35,6 +36,8 @@ function AppContent() {
         return hasPermission(['captain', 'admin']) ? <Notifications /> : <Home onNavigate={setCurrentPage} />;
       case 'admin':
         return hasPermission(['admin']) ? <Admin /> : <Home onNavigate={setCurrentPage} />;
+      case 'data':
+        return hasPermission(['admin']) ? <DataManagement /> : <Home onNavigate={setCurrentPage} />;
       default:
         return <Home onNavigate={setCurrentPage} />;
     }

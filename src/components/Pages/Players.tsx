@@ -1,6 +1,43 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, Trophy, Target, Users, Mail, Phone, Edit3, Save, X, Plus, Trash2, User } from 'lucide-react';
+import { 
+  Users, 
+  Search, 
+  Filter, 
+  Plus, 
+  Edit3, 
+  Trash2, 
+  Mail, 
+  Phone, 
+  Trophy, 
+  Target,
+  User,
+  Save,
+  X,
+  Download,
+  Upload,
+  RefreshCw
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useDataService } from '../../hooks/useDataService';
+
+interface Player {
+  id: string;
+  name: string;
+  position: 'Batsman' | 'All-rounder' | 'Bowler' | 'Wicket-keeper';
+  email?: string;
+  phone?: string;
+  stats?: {
+    runs: number;
+    wickets: number;
+    matches: number;
+  };
+  year: string;
+  season: string;
+  league: string;
+  overs: string;
+  category: string;
+  teamName: string;
+}
 
 interface PlayerFilters {
   search: string;
@@ -9,48 +46,23 @@ interface PlayerFilters {
   position: string;
   year: string;
   season: string;
-}
-
-interface Player {
-  id: string;
-  name: string;
-  position: 'Batsman' | 'All-rounder' | 'Bowler' | 'Wicket-keeper';
-  stats: {
-    runs: number;
-    wickets: number;
-    matches: number;
-  };
-  year: string;
-  season: string;
-  league: string;
-  overs: string;
   category: string;
-  teamName: string;
-  email?: string;
-  phone?: string;
-}
-
-interface NewPlayerData {
-  name: string;
-  position: 'Batsman' | 'All-rounder' | 'Bowler' | 'Wicket-keeper';
-  teamName: string;
-  league: string;
-  overs: string;
-  category: string;
-  year: string;
-  season: string;
-  email?: string;
-  phone?: string;
-  stats: {
-    runs: number;
-    wickets: number;
-    matches: number;
-  };
 }
 
 export default function Players() {
   const { hasPermission } = useAuth();
-  const canEditPlayers = hasPermission(['captain', 'vice', 'admin']);
+  const canManagePlayers = hasPermission(['captain', 'vice', 'admin']);
+  
+  // Use the data service hook
+  const {
+    data: players,
+    loading,
+    error,
+    add: addPlayer,
+    update: updatePlayer,
+    remove: removePlayer,
+    refresh: refreshPlayers
+  } = useDataService<Player>('players');
 
   const [filters, setFilters] = useState<PlayerFilters>({
     search: '',
@@ -58,34 +70,30 @@ export default function Players() {
     league: '',
     position: '',
     year: '2025',
-    season: 'summer'
+    season: 'summer',
+    category: 'Adult'
   });
 
-  const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ email: string; phone: string }>({ email: '', phone: '' });
-  const [showAddContactModal, setShowAddContactModal] = useState(false);
-  const [selectedPlayerForContact, setSelectedPlayerForContact] = useState<Player | null>(null);
-
-  // Player Management States
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [newPlayer, setNewPlayer] = useState<NewPlayerData>({
+
+  const [newPlayer, setNewPlayer] = useState<Partial<Player>>({
     name: '',
     position: 'Batsman',
-    teamName: '',
+    email: '',
+    phone: '',
+    year: '2025',
+    season: 'summer',
     league: 'ARCL',
     overs: '16 overs',
     category: 'Adult',
-    year: '2025',
-    season: 'summer',
-    email: '',
-    phone: '',
+    teamName: '',
     stats: { runs: 0, wickets: 0, matches: 0 }
   });
-  const [editPlayer, setEditPlayer] = useState<Partial<Player>>({});
 
-  // Available teams for selection
+  // Available teams for assignment
   const availableTeams = [
     // ARCL Teams
     { name: 'Angry Bulls', league: 'ARCL', format: '16 overs', category: 'Adult' },
@@ -109,292 +117,15 @@ export default function Players() {
     { name: 'Solaris Youth T40', league: 'NWCL', format: 'T40', category: 'Youth' }
   ];
 
-  // Extended players data with contact information (images removed)
-  const [players, setPlayers] = useState<Player[]>([
-    // Cereal Killers players (all 14 players)
-    {
-      id: '1',
-      name: 'Naim Mohammad',
-      position: 'Batsman',
-      stats: { runs: 1456, wickets: 2, matches: 25 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'naim.mohammad@email.com',
-      phone: '+1-206-555-0101'
-    },
-    {
-      id: '2',
-      name: 'Dhruva Kumar',
-      position: 'Batsman',
-      stats: { runs: 1234, wickets: 1, matches: 23 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'dhruva.kumar@email.com',
-      phone: '+1-206-555-0102'
-    },
-    {
-      id: '3',
-      name: 'Darshan Masti Prakash',
-      position: 'All-rounder',
-      stats: { runs: 890, wickets: 23, matches: 30 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'darshan.prakash@email.com',
-      phone: '+1-206-555-0103'
-    },
-    {
-      id: '4',
-      name: 'Vinuth Muniraju',
-      position: 'Bowler',
-      stats: { runs: 245, wickets: 45, matches: 29 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'vinuth.muniraju@email.com',
-      phone: '+1-206-555-0104'
-    },
-    {
-      id: '5',
-      name: 'Uday C',
-      position: 'Batsman',
-      stats: { runs: 1123, wickets: 3, matches: 26 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'uday.c@email.com',
-      phone: '+1-206-555-0105'
-    },
-    {
-      id: '6',
-      name: 'Vidhyadhar Ghorpade',
-      position: 'All-rounder',
-      stats: { runs: 734, wickets: 18, matches: 27 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'vidhyadhar.ghorpade@email.com',
-      phone: '+1-206-555-0106'
-    },
-    {
-      id: '7',
-      name: 'Vijeth Shetty',
-      position: 'Bowler',
-      stats: { runs: 156, wickets: 38, matches: 30 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'vijeth.shetty@email.com',
-      phone: '+1-206-555-0107'
-    },
-    {
-      id: '8',
-      name: 'Kiran S',
-      position: 'Batsman',
-      stats: { runs: 892, wickets: 1, matches: 22 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'kiran.s@email.com',
-      phone: '+1-206-555-0108'
-    },
-    {
-      id: '9',
-      name: 'Manjunatha Shetty Kondalli',
-      position: 'Wicket-keeper',
-      stats: { runs: 678, wickets: 0, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'manjunatha.kondalli@email.com',
-      phone: '+1-206-555-0109'
-    },
-    {
-      id: '10',
-      name: 'Raj Mani N',
-      position: 'All-rounder',
-      stats: { runs: 567, wickets: 12, matches: 24 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'raj.mani@email.com',
-      phone: '+1-206-555-0110'
-    },
-    {
-      id: '11',
-      name: 'Arun Thippur Jayakeerthy',
-      position: 'Bowler',
-      stats: { runs: 89, wickets: 29, matches: 27 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'arun.jayakeerthy@email.com',
-      phone: '+1-206-555-0111'
-    },
-    {
-      id: '12',
-      name: 'Avinash Talanki',
-      position: 'Batsman',
-      stats: { runs: 445, wickets: 15, matches: 18 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'avinash.talanki@email.com',
-      phone: '+1-206-555-0112'
-    },
-    {
-      id: '13',
-      name: 'Dhanush Shetty CK',
-      position: 'All-rounder',
-      stats: { runs: 78, wickets: 32, matches: 20 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'dhanush.shetty@email.com',
-      phone: '+1-206-555-0113'
-    },
-    {
-      id: '14',
-      name: 'Siva Krapa',
-      position: 'Bowler',
-      stats: { runs: 234, wickets: 41, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers',
-      email: 'siva.krapa@email.com',
-      phone: '+1-206-555-0114'
-    },
-
-    // Other team players
-    {
-      id: '15',
-      name: 'Rajesh Kumar',
-      position: 'Batsman',
-      stats: { runs: 1250, wickets: 5, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Angry Bulls',
-      email: 'rajesh.kumar@email.com',
-      phone: '+1-206-555-0115'
-    },
-    {
-      id: '16',
-      name: 'Priya Sharma',
-      position: 'All-rounder',
-      stats: { runs: 890, wickets: 23, matches: 30 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Royal Warriors',
-      email: 'priya.sharma@email.com',
-      phone: '+1-206-555-0116'
-    },
-    {
-      id: '17',
-      name: 'Vikram Singh',
-      position: 'Bowler',
-      stats: { runs: 245, wickets: 45, matches: 29 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Adult',
-      teamName: 'Watermelons',
-      email: 'vikram.singh@email.com',
-      phone: '+1-206-555-0117'
-    },
-    {
-      id: '18',
-      name: 'Anita Patel',
-      position: 'Wicket-keeper',
-      stats: { runs: 678, wickets: 0, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Adult',
-      teamName: 'Solaris',
-      email: 'anita.patel@email.com',
-      phone: '+1-206-555-0118'
-    },
-    {
-      id: '19',
-      name: 'Arjun Reddy',
-      position: 'Batsman',
-      stats: { runs: 1456, wickets: 2, matches: 25 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Angry Bulls',
-      email: 'arjun.reddy@email.com',
-      phone: '+1-206-555-0119'
-    },
-    {
-      id: '20',
-      name: 'Meera Gupta',
-      position: 'All-rounder',
-      stats: { runs: 734, wickets: 18, matches: 27 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Youth',
-      teamName: 'Watermelons',
-      email: 'meera.gupta@email.com',
-      phone: '+1-206-555-0120'
+  // Get available overs based on selected league
+  const getAvailableOvers = (league: string) => {
+    if (league === 'ARCL') {
+      return ['16 overs'];
+    } else if (league === 'NWCL') {
+      return ['T10', 'T20', 'T40'];
     }
-  ]);
+    return [];
+  };
 
   // Filter players based on current filters
   const filteredPlayers = useMemo(() => {
@@ -408,10 +139,12 @@ export default function Players() {
       const matchesPosition = !filters.position || player.position === filters.position;
       const matchesYear = !filters.year || player.year === filters.year;
       const matchesSeason = !filters.season || player.season === filters.season;
+      const matchesCategory = !filters.category || player.category === filters.category;
 
-      return matchesSearch && matchesTeam && matchesLeague && matchesPosition && matchesYear && matchesSeason;
+      return matchesSearch && matchesTeam && matchesLeague && matchesPosition && 
+             matchesYear && matchesSeason && matchesCategory;
     });
-  }, [filters, players]);
+  }, [players, filters]);
 
   // Get unique values for filter dropdowns
   const getUniqueTeamNames = () => {
@@ -420,20 +153,6 @@ export default function Players() {
 
   const getUniqueLeagues = () => {
     return [...new Set(players.map(player => player.league))].sort();
-  };
-
-  const getUniquePositions = () => {
-    return [...new Set(players.map(player => player.position))].sort();
-  };
-
-  // Get available overs based on selected league
-  const getAvailableOvers = (league: string) => {
-    if (league === 'ARCL') {
-      return ['16 overs'];
-    } else if (league === 'NWCL') {
-      return ['T10', 'T20', 'T40'];
-    }
-    return [];
   };
 
   const getPositionColor = (position: string) => {
@@ -455,214 +174,12 @@ export default function Players() {
       .join('');
   };
 
-  // Contact Information Handlers
-  const handleEditContact = (player: Player) => {
-    setEditingPlayer(player.id);
-    setEditForm({
-      email: player.email || '',
-      phone: player.phone || ''
-    });
-  };
-
-  const handleSaveContact = (playerId: string) => {
-    // Validate email format
-    if (editForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    // Validate phone format
-    if (editForm.phone && !/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(editForm.phone.replace(/\D/g, ''))) {
-      alert('Please enter a valid phone number (e.g., +1-206-555-0123)');
-      return;
-    }
-
-    // Update player contact information
-    setPlayers(prev => prev.map(player => 
-      player.id === playerId 
-        ? { 
-            ...player, 
-            email: editForm.email || undefined,
-            phone: editForm.phone || undefined
-          }
-        : player
-    ));
-
-    setEditingPlayer(null);
-    setEditForm({ email: '', phone: '' });
-    alert('Contact information updated successfully!');
-  };
-
-  const handleCancelEdit = () => {
-    setEditingPlayer(null);
-    setEditForm({ email: '', phone: '' });
-  };
-
-  const handleAddContact = (player: Player) => {
-    setSelectedPlayerForContact(player);
-    setEditForm({
-      email: player.email || '',
-      phone: player.phone || ''
-    });
-    setShowAddContactModal(true);
-  };
-
-  const handleSaveContactModal = () => {
-    if (!selectedPlayerForContact) return;
-
-    // Validate email format
-    if (editForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    // Validate phone format
-    if (editForm.phone && !/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(editForm.phone.replace(/\D/g, ''))) {
-      alert('Please enter a valid phone number (e.g., +1-206-555-0123)');
-      return;
-    }
-
-    // Update player contact information
-    setPlayers(prev => prev.map(player => 
-      player.id === selectedPlayerForContact.id 
-        ? { 
-            ...player, 
-            email: editForm.email || undefined,
-            phone: editForm.phone || undefined
-          }
-        : player
-    ));
-
-    setShowAddContactModal(false);
-    setSelectedPlayerForContact(null);
-    setEditForm({ email: '', phone: '' });
-    alert('Contact information updated successfully!');
-  };
-
-  // Player Management Handlers
-  const handleAddPlayer = () => {
-    if (!newPlayer.name.trim()) {
-      alert('Please enter a player name.');
-      return;
-    }
-
-    if (!newPlayer.teamName) {
-      alert('Please select a team.');
-      return;
-    }
-
-    // Validate email format if provided
-    if (newPlayer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newPlayer.email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    // Validate phone format if provided
-    if (newPlayer.phone && !/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(newPlayer.phone.replace(/\D/g, ''))) {
-      alert('Please enter a valid phone number (e.g., +1-206-555-0123)');
-      return;
-    }
-
-    const player: Player = {
-      id: Date.now().toString(),
-      name: newPlayer.name,
-      position: newPlayer.position,
-      stats: newPlayer.stats,
-      year: newPlayer.year,
-      season: newPlayer.season,
-      league: newPlayer.league,
-      overs: newPlayer.overs,
-      category: newPlayer.category,
-      teamName: newPlayer.teamName,
-      email: newPlayer.email || undefined,
-      phone: newPlayer.phone || undefined
-    };
-
-    // Actually add the player to the state
-    setPlayers(prev => [...prev, player]);
-    
-    setShowAddPlayerModal(false);
-    setNewPlayer({
-      name: '',
-      position: 'Batsman',
-      teamName: '',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      year: '2025',
-      season: 'summer',
-      email: '',
-      phone: '',
-      stats: { runs: 0, wickets: 0, matches: 0 }
-    });
-
-    alert(`Player "${player.name}" added successfully to ${player.teamName}!`);
-  };
-
-  const handleEditPlayer = (player: Player) => {
-    setSelectedPlayer(player);
-    setEditPlayer({
-      name: player.name,
-      position: player.position,
-      teamName: player.teamName,
-      league: player.league,
-      overs: player.overs,
-      category: player.category,
-      year: player.year,
-      season: player.season,
-      email: player.email,
-      phone: player.phone,
-      stats: player.stats
-    });
-    setShowEditPlayerModal(true);
-  };
-
-  const handleUpdatePlayer = () => {
-    if (!selectedPlayer || !editPlayer.name) {
-      alert('Please fill in all required fields.');
-      return;
-    }
-
-    // Validate email format if provided
-    if (editPlayer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editPlayer.email)) {
-      alert('Please enter a valid email address');
-      return;
-    }
-
-    // Validate phone format if provided
-    if (editPlayer.phone && !/^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(editPlayer.phone.replace(/\D/g, ''))) {
-      alert('Please enter a valid phone number (e.g., +1-206-555-0123)');
-      return;
-    }
-
-    // Update the player in the state
-    setPlayers(prev => prev.map(player => 
-      player.id === selectedPlayer.id 
-        ? { ...player, ...editPlayer } as Player
-        : player
-    ));
-
-    setShowEditPlayerModal(false);
-    setSelectedPlayer(null);
-    setEditPlayer({});
-
-    alert(`Player "${editPlayer.name}" updated successfully!`);
-  };
-
-  const handleDeletePlayer = (playerId: string, playerName: string) => {
-    if (confirm(`Are you sure you want to delete player "${playerName}"? This action cannot be undone.`)) {
-      // Actually remove the player from the state
-      setPlayers(prev => prev.filter(player => player.id !== playerId));
-      alert(`Player "${playerName}" deleted successfully!`);
-    }
-  };
-
   // Handle new player filter changes
-  const handleNewPlayerFilterChange = (key: keyof NewPlayerData, value: any) => {
+  const handleNewPlayerFilterChange = (key: keyof Player, value: string) => {
     setNewPlayer(prev => {
       const updated = { ...prev, [key]: value };
       
-      // Reset overs when league changes in new player form
+      // Reset overs when league changes
       if (key === 'league') {
         const availableOvers = getAvailableOvers(value);
         updated.overs = availableOvers[0] || '';
@@ -671,6 +188,174 @@ export default function Players() {
       return updated;
     });
   };
+
+  // Handle add player
+  const handleAddPlayer = async () => {
+    if (!newPlayer.name?.trim() || !newPlayer.teamName) {
+      alert('Please fill in player name and team assignment.');
+      return;
+    }
+
+    try {
+      const player: Player = {
+        id: Date.now().toString(),
+        name: newPlayer.name,
+        position: newPlayer.position || 'Batsman',
+        email: newPlayer.email || '',
+        phone: newPlayer.phone || '',
+        year: newPlayer.year || '2025',
+        season: newPlayer.season || 'summer',
+        league: newPlayer.league || 'ARCL',
+        overs: newPlayer.overs || '16 overs',
+        category: newPlayer.category || 'Adult',
+        teamName: newPlayer.teamName,
+        stats: newPlayer.stats || { runs: 0, wickets: 0, matches: 0 }
+      };
+
+      await addPlayer(player);
+      
+      setShowAddPlayerModal(false);
+      setNewPlayer({
+        name: '',
+        position: 'Batsman',
+        email: '',
+        phone: '',
+        year: '2025',
+        season: 'summer',
+        league: 'ARCL',
+        overs: '16 overs',
+        category: 'Adult',
+        teamName: '',
+        stats: { runs: 0, wickets: 0, matches: 0 }
+      });
+
+      alert(`Player "${player.name}" added successfully to ${player.teamName}!`);
+    } catch (error) {
+      alert('Failed to add player. Please try again.');
+    }
+  };
+
+  // Handle edit player
+  const handleEditPlayer = (player: Player) => {
+    setSelectedPlayer(player);
+    setNewPlayer({ ...player });
+    setShowEditPlayerModal(true);
+  };
+
+  // Handle update player
+  const handleUpdatePlayer = async () => {
+    if (!selectedPlayer || !newPlayer.name?.trim()) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      await updatePlayer(selectedPlayer.id, newPlayer);
+      
+      setShowEditPlayerModal(false);
+      setSelectedPlayer(null);
+      setNewPlayer({
+        name: '',
+        position: 'Batsman',
+        email: '',
+        phone: '',
+        year: '2025',
+        season: 'summer',
+        league: 'ARCL',
+        overs: '16 overs',
+        category: 'Adult',
+        teamName: '',
+        stats: { runs: 0, wickets: 0, matches: 0 }
+      });
+
+      alert(`Player "${newPlayer.name}" updated successfully!`);
+    } catch (error) {
+      alert('Failed to update player. Please try again.');
+    }
+  };
+
+  // Handle delete player
+  const handleDeletePlayer = async (playerId: string, playerName: string) => {
+    if (confirm(`Are you sure you want to delete player "${playerName}"? This action cannot be undone.`)) {
+      try {
+        await removePlayer(playerId);
+        alert(`Player "${playerName}" deleted successfully!`);
+      } catch (error) {
+        alert('Failed to delete player. Please try again.');
+      }
+    }
+  };
+
+  // Handle contact info update
+  const handleUpdateContact = async () => {
+    if (!selectedPlayer) return;
+
+    try {
+      await updatePlayer(selectedPlayer.id, {
+        email: newPlayer.email,
+        phone: newPlayer.phone
+      });
+      
+      setShowContactModal(false);
+      setSelectedPlayer(null);
+      setNewPlayer({
+        name: '',
+        position: 'Batsman',
+        email: '',
+        phone: '',
+        year: '2025',
+        season: 'summer',
+        league: 'ARCL',
+        overs: '16 overs',
+        category: 'Adult',
+        teamName: '',
+        stats: { runs: 0, wickets: 0, matches: 0 }
+      });
+
+      alert('Contact information updated successfully!');
+    } catch (error) {
+      alert('Failed to update contact information. Please try again.');
+    }
+  };
+
+  // Handle contact edit
+  const handleEditContact = (player: Player) => {
+    setSelectedPlayer(player);
+    setNewPlayer({
+      ...newPlayer,
+      email: player.email || '',
+      phone: player.phone || ''
+    });
+    setShowContactModal(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="mx-auto mb-4 text-white animate-spin" size={48} />
+          <p className="text-white text-xl">Loading players...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <X className="mx-auto mb-4 text-red-400" size={48} />
+          <p className="text-red-400 text-xl mb-4">Error loading players: {error}</p>
+          <button
+            onClick={refreshPlayers}
+            className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -685,30 +370,70 @@ export default function Players() {
           </h1>
           <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
             Meet our talented cricket players from across different teams and leagues. 
-            Track their performance, statistics, and contact information for better team coordination.
+            Discover their achievements, contact information, and cricket statistics.
           </p>
         </div>
 
-        {/* Filters */}
+        {/* Player Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20">
+            <Users className="mx-auto mb-3 text-orange-400" size={32} />
+            <div className="text-3xl font-bold text-white mb-1">{players.length}</div>
+            <div className="text-white/70">Total Players</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20">
+            <Trophy className="mx-auto mb-3 text-yellow-400" size={32} />
+            <div className="text-3xl font-bold text-white mb-1">
+              {players.reduce((total, player) => total + (player.stats?.runs || 0), 0)}
+            </div>
+            <div className="text-white/70">Total Runs</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20">
+            <Target className="mx-auto mb-3 text-blue-400" size={32} />
+            <div className="text-3xl font-bold text-white mb-1">
+              {players.reduce((total, player) => total + (player.stats?.wickets || 0), 0)}
+            </div>
+            <div className="text-white/70">Total Wickets</div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white/20">
+            <User className="mx-auto mb-3 text-green-400" size={32} />
+            <div className="text-3xl font-bold text-white mb-1">
+              {new Set(players.map(player => player.teamName)).size}
+            </div>
+            <div className="text-white/70">Teams</div>
+          </div>
+        </div>
+
+        {/* Filters and Add Player */}
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+            <div className="flex items-center space-x-3 mb-4 lg:mb-0">
               <Filter className="text-orange-400" size={24} />
               <h2 className="text-2xl font-bold text-white">Filter Players</h2>
             </div>
             
-            {canEditPlayers && (
+            <div className="flex space-x-3">
               <button
-                onClick={() => setShowAddPlayerModal(true)}
-                className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-2"
+                onClick={refreshPlayers}
+                className="bg-white/10 text-white px-4 py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors flex items-center space-x-2"
               >
-                <Plus size={20} />
-                <span>Add New Player</span>
+                <RefreshCw size={16} />
+                <span>Refresh</span>
               </button>
-            )}
+              
+              {canManagePlayers && (
+                <button
+                  onClick={() => setShowAddPlayerModal(true)}
+                  className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <Plus size={20} />
+                  <span>Add Player</span>
+                </button>
+              )}
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={16} />
@@ -721,108 +446,118 @@ export default function Players() {
               />
             </div>
 
-            {/* Team */}
-            <select
-              value={filters.teamName}
-              onChange={(e) => setFilters({ ...filters, teamName: e.target.value })}
-              className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="" className="bg-gray-900">All Teams</option>
-              {getUniqueTeamNames().map(team => (
-                <option key={team} value={team} className="bg-gray-900">{team}</option>
-              ))}
-            </select>
+            {/* Team Filter */}
+            <div>
+              <select
+                value={filters.teamName}
+                onChange={(e) => setFilters({ ...filters, teamName: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="" className="bg-gray-900">All Teams</option>
+                {getUniqueTeamNames().map(team => (
+                  <option key={team} value={team} className="bg-gray-900">{team}</option>
+                ))}
+              </select>
+            </div>
 
-            {/* League */}
-            <select
-              value={filters.league}
-              onChange={(e) => setFilters({ ...filters, league: e.target.value })}
-              className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="" className="bg-gray-900">All Leagues</option>
-              {getUniqueLeagues().map(league => (
-                <option key={league} value={league} className="bg-gray-900">{league}</option>
-              ))}
-            </select>
+            {/* League Filter */}
+            <div>
+              <select
+                value={filters.league}
+                onChange={(e) => setFilters({ ...filters, league: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="" className="bg-gray-900">All Leagues</option>
+                {getUniqueLeagues().map(league => (
+                  <option key={league} value={league} className="bg-gray-900">{league}</option>
+                ))}
+              </select>
+            </div>
 
-            {/* Position */}
-            <select
-              value={filters.position}
-              onChange={(e) => setFilters({ ...filters, position: e.target.value })}
-              className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="" className="bg-gray-900">All Positions</option>
-              {getUniquePositions().map(position => (
-                <option key={position} value={position} className="bg-gray-900">{position}</option>
-              ))}
-            </select>
-
-            {/* Year */}
-            <select
-              value={filters.year}
-              onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-              className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="2025" className="bg-gray-900">2025</option>
-              <option value="2024" className="bg-gray-900">2024</option>
-              <option value="2023" className="bg-gray-900">2023</option>
-            </select>
-
-            {/* Season */}
-            <select
-              value={filters.season}
-              onChange={(e) => setFilters({ ...filters, season: e.target.value })}
-              className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="summer" className="bg-gray-900">Summer</option>
-              <option value="spring" className="bg-gray-900">Spring</option>
-            </select>
+            {/* Position Filter */}
+            <div>
+              <select
+                value={filters.position}
+                onChange={(e) => setFilters({ ...filters, position: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="" className="bg-gray-900">All Positions</option>
+                <option value="Batsman" className="bg-gray-900">Batsman</option>
+                <option value="All-rounder" className="bg-gray-900">All-rounder</option>
+                <option value="Bowler" className="bg-gray-900">Bowler</option>
+                <option value="Wicket-keeper" className="bg-gray-900">Wicket-keeper</option>
+              </select>
+            </div>
           </div>
 
-          {/* Clear Filters */}
-          <div className="mt-4 flex justify-between items-center">
-            <button
-              onClick={() => setFilters({
-                search: '',
-                teamName: '',
-                league: '',
-                position: '',
-                year: '2025',
-                season: 'summer'
-              })}
-              className="text-orange-400 hover:text-orange-300 text-sm font-semibold"
-            >
-              Clear All Filters
-            </button>
-            <span className="text-white/70 text-sm">
-              Showing {filteredPlayers.length} of {players.length} players
-            </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Year Filter */}
+            <div>
+              <select
+                value={filters.year}
+                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="2025" className="bg-gray-900">2025</option>
+                <option value="2024" className="bg-gray-900">2024</option>
+                <option value="2023" className="bg-gray-900">2023</option>
+              </select>
+            </div>
+
+            {/* Season Filter */}
+            <div>
+              <select
+                value={filters.season}
+                onChange={(e) => setFilters({ ...filters, season: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="summer" className="bg-gray-900">Summer</option>
+                <option value="spring" className="bg-gray-900">Spring</option>
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="Adult" className="bg-gray-900">Adult</option>
+                <option value="Youth" className="bg-gray-900">Youth</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Permission Notice */}
-        {!canEditPlayers && (
+        {/* Permission Notice for Non-Leadership */}
+        {!canManagePlayers && (
           <div className="bg-blue-500/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 mb-8">
             <div className="flex items-center space-x-3 text-blue-300">
               <Users size={20} />
               <span className="font-semibold">Player Management</span>
             </div>
             <p className="text-blue-200 mt-2">
-              Only team captains, vice captains, and admins can add, edit, or delete players.
+              Only team captains, vice captains, and admins can add, edit, or delete players. 
+              You can still view player information and contact details.
             </p>
           </div>
         )}
 
         {/* Players Grid */}
         <section>
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+            {filteredPlayers.length > 0 ? `Cricket Players (${filteredPlayers.length})` : 'No Players Found'}
+          </h2>
+          
           {filteredPlayers.length === 0 ? (
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 text-center">
               <Users className="mx-auto mb-4 text-white/50" size={48} />
               <h3 className="text-xl font-bold text-white mb-2">No Players Found</h3>
               <p className="text-white/70 mb-6">
-                No players match your current filter criteria. Try adjusting your filters.
+                No players match your current filters. Try adjusting your search criteria.
               </p>
-              {canEditPlayers && (
+              {canManagePlayers && (
                 <button
                   onClick={() => setShowAddPlayerModal(true)}
                   className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all"
@@ -832,134 +567,94 @@ export default function Players() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredPlayers.map(player => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105 relative"
+                  className="group bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105"
                 >
-                  {/* Management Actions - Only visible to captain/vice/admin */}
-                  {canEditPlayers && (
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
-                      <button
-                        onClick={() => handleEditPlayer(player)}
-                        className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeletePlayer(player.id, player.name)}
-                        className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Player Avatar - Now using initials */}
+                  {/* Player Header */}
                   <div className="text-center mb-6">
-                    <div className={`w-20 h-20 rounded-2xl mx-auto mb-4 border-2 border-white/20 bg-gradient-to-r ${getPositionColor(player.position)} flex items-center justify-center`}>
+                    <div className={`w-20 h-20 bg-gradient-to-r ${getPositionColor(player.position)} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
                       <span className="text-white text-xl font-bold">
                         {getPlayerInitials(player.name)}
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">{player.name}</h3>
-                    <div className={`inline-block bg-gradient-to-r ${getPositionColor(player.position)} px-3 py-1 rounded-full text-xs font-semibold text-white mb-2`}>
+                    <h3 className="text-2xl font-bold text-white mb-2">{player.name}</h3>
+                    <div className={`inline-block bg-gradient-to-r ${getPositionColor(player.position)} px-4 py-2 rounded-full text-sm font-semibold text-white mb-2`}>
                       {player.position}
                     </div>
                     <div className="text-white/70 text-sm">
-                      {player.teamName} • {player.league}
-                    </div>
-                    <div className="text-white/60 text-xs">
-                      {player.overs} • {player.category} • {player.year} {player.season}
+                      {player.teamName} • {player.league} • {player.category}
                     </div>
                   </div>
 
-                  {/* Contact Information */}
-                  <div className="mb-6 space-y-3">
-                    <h4 className="text-white font-semibold text-sm flex items-center space-x-2">
-                      <Mail size={14} />
-                      <span>Contact Information</span>
-                      {canEditPlayers && (
-                        <button
-                          onClick={() => editingPlayer === player.id ? handleCancelEdit() : handleEditContact(player)}
-                          className="ml-auto p-1 text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
-                        >
-                          {editingPlayer === player.id ? <X size={12} /> : <Edit3 size={12} />}
-                        </button>
-                      )}
-                    </h4>
-
-                    {editingPlayer === player.id ? (
-                      <div className="space-y-2">
-                        <input
-                          type="email"
-                          value={editForm.email}
-                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                          className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 text-xs"
-                          placeholder="Email address"
-                        />
-                        <input
-                          type="tel"
-                          value={editForm.phone}
-                          onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                          className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 text-xs"
-                          placeholder="Phone number"
-                        />
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleSaveContact(player.id)}
-                            className="flex-1 bg-green-500/20 text-green-300 px-3 py-2 rounded-lg hover:bg-green-500/30 transition-colors text-xs font-semibold flex items-center justify-center space-x-1"
-                          >
-                            <Save size={12} />
-                            <span>Save</span>
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="flex-1 bg-red-500/20 text-red-300 px-3 py-2 rounded-lg hover:bg-red-500/30 transition-colors text-xs font-semibold flex items-center justify-center space-x-1"
-                          >
-                            <X size={12} />
-                            <span>Cancel</span>
-                          </button>
-                        </div>
+                  {/* Player Stats */}
+                  {player.stats && (
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">{player.stats.runs}</div>
+                        <div className="text-xs text-white/70">Runs</div>
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 text-white/80 text-xs">
-                          <Mail size={12} />
-                          <span>{player.email || 'No email'}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-white/80 text-xs">
-                          <Phone size={12} />
-                          <span>{player.phone || 'No phone'}</span>
-                        </div>
-                        {canEditPlayers && (!player.email || !player.phone) && (
-                          <button
-                            onClick={() => handleAddContact(player)}
-                            className="w-full bg-orange-500/20 text-orange-300 px-3 py-2 rounded-lg hover:bg-orange-500/30 transition-colors text-xs font-semibold flex items-center justify-center space-x-1"
-                          >
-                            <Plus size={12} />
-                            <span>Add Contact Info</span>
-                          </button>
-                        )}
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">{player.stats.wickets}</div>
+                        <div className="text-xs text-white/70">Wickets</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">{player.stats.matches}</div>
+                        <div className="text-xs text-white/70">Matches</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact Information */}
+                  <div className="space-y-3 mb-6">
+                    {player.email && (
+                      <div className="flex items-center space-x-3 text-white/80">
+                        <Mail size={16} className="text-blue-400" />
+                        <span className="text-sm truncate">{player.email}</span>
+                      </div>
+                    )}
+                    {player.phone && (
+                      <div className="flex items-center space-x-3 text-white/80">
+                        <Phone size={16} className="text-green-400" />
+                        <span className="text-sm">{player.phone}</span>
+                      </div>
+                    )}
+                    {(!player.email && !player.phone) && (
+                      <div className="text-white/50 text-sm text-center py-2">
+                        No contact information available
                       </div>
                     )}
                   </div>
 
-                  {/* Player Stats */}
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-white">{player.stats.runs}</div>
-                      <div className="text-xs text-white/70">Runs</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-white">{player.stats.wickets}</div>
-                      <div className="text-xs text-white/70">Wickets</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-white">{player.stats.matches}</div>
-                      <div className="text-xs text-white/70">Matches</div>
-                    </div>
+                  {/* Action Buttons */}
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditContact(player)}
+                      className="flex-1 bg-blue-500/20 text-blue-300 py-2 px-3 rounded-lg hover:bg-blue-500/30 transition-colors text-sm font-semibold flex items-center justify-center space-x-1"
+                    >
+                      <Mail size={14} />
+                      <span>Contact</span>
+                    </button>
+                    
+                    {canManagePlayers && (
+                      <>
+                        <button
+                          onClick={() => handleEditPlayer(player)}
+                          className="flex-1 bg-green-500/20 text-green-300 py-2 px-3 rounded-lg hover:bg-green-500/30 transition-colors text-sm font-semibold flex items-center justify-center space-x-1"
+                        >
+                          <Edit3 size={14} />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlayer(player.id, player.name)}
+                          className="bg-red-500/20 text-red-300 py-2 px-3 rounded-lg hover:bg-red-500/30 transition-colors text-sm font-semibold"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -968,7 +663,7 @@ export default function Players() {
         </section>
 
         {/* Add Player Modal */}
-        {showAddPlayerModal && canEditPlayers && (
+        {showAddPlayerModal && canManagePlayers && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/30 max-h-[90vh] overflow-y-auto">
               <h3 className="text-2xl font-bold text-white mb-6">Add New Cricket Player</h3>
@@ -980,268 +675,21 @@ export default function Players() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Player Name *</label>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Full Name *</label>
                       <input
                         type="text"
-                        value={newPlayer.name}
-                        onChange={(e) => handleNewPlayerFilterChange('name', e.target.value)}
+                        value={newPlayer.name || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter player name"
+                        placeholder="Enter player's full name"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-2">Position *</label>
                       <select
-                        value={newPlayer.position}
-                        onChange={(e) => handleNewPlayerFilterChange('position', e.target.value)}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      >
-                        <option value="Batsman" className="bg-gray-900">Batsman</option>
-                        <option value="All-rounder" className="bg-gray-900">All-rounder</option>
-                        <option value="Bowler" className="bg-gray-900">Bowler</option>
-                        <option value="Wicket-keeper" className="bg-gray-900">Wicket-keeper</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Team Assignment */}
-                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4">Team Assignment</h4>
-                  
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">League *</label>
-                        <select
-                          value={newPlayer.league}
-                          onChange={(e) => handleNewPlayerFilterChange('league', e.target.value)}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="ARCL" className="bg-gray-900">ARCL</option>
-                          <option value="NWCL" className="bg-gray-900">NWCL</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">Format *</label>
-                        <select
-                          value={newPlayer.overs}
-                          onChange={(e) => handleNewPlayerFilterChange('overs', e.target.value)}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          {getAvailableOvers(newPlayer.league).map(format => (
-                            <option key={format} value={format} className="bg-gray-900">{format}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">Category *</label>
-                        <select
-                          value={newPlayer.category}
-                          onChange={(e) => handleNewPlayerFilterChange('category', e.target.value)}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="Adult" className="bg-gray-900">Adult</option>
-                          <option value="Youth" className="bg-gray-900">Youth</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">Year *</label>
-                        <select
-                          value={newPlayer.year}
-                          onChange={(e) => handleNewPlayerFilterChange('year', e.target.value)}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="2025" className="bg-gray-900">2025</option>
-                          <option value="2024" className="bg-gray-900">2024</option>
-                          <option value="2023" className="bg-gray-900">2023</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">Season *</label>
-                        <select
-                          value={newPlayer.season}
-                          onChange={(e) => handleNewPlayerFilterChange('season', e.target.value)}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="summer" className="bg-gray-900">Summer</option>
-                          <option value="spring" className="bg-gray-900">Spring</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Team *</label>
-                      <select
-                        value={newPlayer.teamName}
-                        onChange={(e) => handleNewPlayerFilterChange('teamName', e.target.value)}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      >
-                        <option value="" className="bg-gray-900">Select a team</option>
-                        {availableTeams
-                          .filter(team => 
-                            team.league === newPlayer.league && 
-                            team.format === newPlayer.overs && 
-                            team.category === newPlayer.category
-                          )
-                          .map(team => (
-                            <option key={team.name} value={team.name} className="bg-gray-900">
-                              {team.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact Information */}
-                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4">Contact Information (Optional)</h4>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Email</label>
-                      <input
-                        type="email"
-                        value={newPlayer.email}
-                        onChange={(e) => handleNewPlayerFilterChange('email', e.target.value)}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="player@email.com"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Phone</label>
-                      <input
-                        type="tel"
-                        value={newPlayer.phone}
-                        onChange={(e) => handleNewPlayerFilterChange('phone', e.target.value)}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="+1-206-555-0123"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Statistics */}
-                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4">Player Statistics</h4>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Runs</label>
-                      <input
-                        type="number"
-                        value={newPlayer.stats.runs}
-                        onChange={(e) => handleNewPlayerFilterChange('stats', { 
-                          ...newPlayer.stats, 
-                          runs: parseInt(e.target.value) || 0 
-                        })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Wickets</label>
-                      <input
-                        type="number"
-                        value={newPlayer.stats.wickets}
-                        onChange={(e) => handleNewPlayerFilterChange('stats', { 
-                          ...newPlayer.stats, 
-                          wickets: parseInt(e.target.value) || 0 
-                        })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Matches</label>
-                      <input
-                        type="number"
-                        value={newPlayer.stats.matches}
-                        onChange={(e) => handleNewPlayerFilterChange('stats', { 
-                          ...newPlayer.stats, 
-                          matches: parseInt(e.target.value) || 0 
-                        })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex space-x-4 mt-8">
-                <button
-                  onClick={() => {
-                    setShowAddPlayerModal(false);
-                    setNewPlayer({
-                      name: '',
-                      position: 'Batsman',
-                      teamName: '',
-                      league: 'ARCL',
-                      overs: '16 overs',
-                      category: 'Adult',
-                      year: '2025',
-                      season: 'summer',
-                      email: '',
-                      phone: '',
-                      stats: { runs: 0, wickets: 0, matches: 0 }
-                    });
-                  }}
-                  className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddPlayer}
-                  disabled={!newPlayer.name.trim() || !newPlayer.teamName}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Add Player
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Player Modal */}
-        {showEditPlayerModal && selectedPlayer && canEditPlayers && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/30 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-2xl font-bold text-white mb-6">Edit Player: {selectedPlayer.name}</h3>
-              
-              <div className="space-y-6">
-                {/* Basic Information */}
-                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4">Basic Information</h4>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Player Name *</label>
-                      <input
-                        type="text"
-                        value={editPlayer.name || ''}
-                        onChange={(e) => setEditPlayer({ ...editPlayer, name: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter player name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Position *</label>
-                      <select
-                        value={editPlayer.position || ''}
-                        onChange={(e) => setEditPlayer({ ...editPlayer, position: e.target.value as Player['position'] })}
+                        value={newPlayer.position || 'Batsman'}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value as Player['position'] })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
                       >
                         <option value="Batsman" className="bg-gray-900">Batsman</option>
@@ -1262,8 +710,8 @@ export default function Players() {
                       <label className="block text-sm font-medium text-white/90 mb-2">Email</label>
                       <input
                         type="email"
-                        value={editPlayer.email || ''}
-                        onChange={(e) => setEditPlayer({ ...editPlayer, email: e.target.value })}
+                        value={newPlayer.email || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, email: e.target.value })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         placeholder="player@email.com"
                       />
@@ -1273,8 +721,219 @@ export default function Players() {
                       <label className="block text-sm font-medium text-white/90 mb-2">Phone</label>
                       <input
                         type="tel"
-                        value={editPlayer.phone || ''}
-                        onChange={(e) => setEditPlayer({ ...editPlayer, phone: e.target.value })}
+                        value={newPlayer.phone || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, phone: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="+1-206-555-0123"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team Assignment */}
+                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-lg font-semibold text-white mb-4">Team Assignment</h4>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">League *</label>
+                        <select
+                          value={newPlayer.league || 'ARCL'}
+                          onChange={(e) => handleNewPlayerFilterChange('league', e.target.value)}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                          <option value="ARCL" className="bg-gray-900">ARCL</option>
+                          <option value="NWCL" className="bg-gray-900">NWCL</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">Format *</label>
+                        <select
+                          value={newPlayer.overs || ''}
+                          onChange={(e) => setNewPlayer({ ...newPlayer, overs: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                          {getAvailableOvers(newPlayer.league || 'ARCL').map(format => (
+                            <option key={format} value={format} className="bg-gray-900">{format}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">Category *</label>
+                        <select
+                          value={newPlayer.category || 'Adult'}
+                          onChange={(e) => setNewPlayer({ ...newPlayer, category: e.target.value })}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                          <option value="Adult" className="bg-gray-900">Adult</option>
+                          <option value="Youth" className="bg-gray-900">Youth</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Team *</label>
+                      <select
+                        value={newPlayer.teamName || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, teamName: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="" className="bg-gray-900">Select a team</option>
+                        {availableTeams
+                          .filter(team => 
+                            team.league === (newPlayer.league || 'ARCL') && 
+                            team.category === (newPlayer.category || 'Adult')
+                          )
+                          .map(team => (
+                            <option key={team.name} value={team.name} className="bg-gray-900">
+                              {team.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statistics */}
+                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-lg font-semibold text-white mb-4">Cricket Statistics</h4>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Runs</label>
+                      <input
+                        type="number"
+                        value={newPlayer.stats?.runs || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
+                          stats: { 
+                            ...newPlayer.stats!, 
+                            runs: parseInt(e.target.value) || 0 
+                          }
+                        })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Wickets</label>
+                      <input
+                        type="number"
+                        value={newPlayer.stats?.wickets || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
+                          stats: { 
+                            ...newPlayer.stats!, 
+                            wickets: parseInt(e.target.value) || 0 
+                          }
+                        })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Matches</label>
+                      <input
+                        type="number"
+                        value={newPlayer.stats?.matches || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
+                          stats: { 
+                            ...newPlayer.stats!, 
+                            matches: parseInt(e.target.value) || 0 
+                          }
+                        })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-4 mt-8">
+                <button
+                  onClick={() => setShowAddPlayerModal(false)}
+                  className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddPlayer}
+                  disabled={!newPlayer.name?.trim() || !newPlayer.teamName}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add Player
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Player Modal */}
+        {showEditPlayerModal && selectedPlayer && canManagePlayers && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/30 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-2xl font-bold text-white mb-6">Edit Player: {selectedPlayer.name}</h3>
+              
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-lg font-semibold text-white mb-4">Basic Information</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        value={newPlayer.name || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="Enter player's full name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Position *</label>
+                      <select
+                        value={newPlayer.position || 'Batsman'}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value as Player['position'] })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="Batsman" className="bg-gray-900">Batsman</option>
+                        <option value="All-rounder" className="bg-gray-900">All-rounder</option>
+                        <option value="Bowler" className="bg-gray-900">Bowler</option>
+                        <option value="Wicket-keeper" className="bg-gray-900">Wicket-keeper</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-lg font-semibold text-white mb-4">Contact Information</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Email</label>
+                      <input
+                        type="email"
+                        value={newPlayer.email || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, email: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="player@email.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Phone</label>
+                      <input
+                        type="tel"
+                        value={newPlayer.phone || ''}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, phone: e.target.value })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         placeholder="+1-206-555-0123"
                       />
@@ -1284,18 +943,18 @@ export default function Players() {
 
                 {/* Statistics */}
                 <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4">Player Statistics</h4>
+                  <h4 className="text-lg font-semibold text-white mb-4">Cricket Statistics</h4>
                   
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-2">Runs</label>
                       <input
                         type="number"
-                        value={editPlayer.stats?.runs || ''}
-                        onChange={(e) => setEditPlayer({ 
-                          ...editPlayer, 
+                        value={newPlayer.stats?.runs || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
                           stats: { 
-                            ...editPlayer.stats!, 
+                            ...newPlayer.stats!, 
                             runs: parseInt(e.target.value) || 0 
                           }
                         })}
@@ -1303,16 +962,15 @@ export default function Players() {
                         placeholder="0"
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-2">Wickets</label>
                       <input
                         type="number"
-                        value={editPlayer.stats?.wickets || ''}
-                        onChange={(e) => setEditPlayer({ 
-                          ...editPlayer, 
+                        value={newPlayer.stats?.wickets || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
                           stats: { 
-                            ...editPlayer.stats!, 
+                            ...newPlayer.stats!, 
                             wickets: parseInt(e.target.value) || 0 
                           }
                         })}
@@ -1320,16 +978,15 @@ export default function Players() {
                         placeholder="0"
                       />
                     </div>
-
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-2">Matches</label>
                       <input
                         type="number"
-                        value={editPlayer.stats?.matches || ''}
-                        onChange={(e) => setEditPlayer({ 
-                          ...editPlayer, 
+                        value={newPlayer.stats?.matches || 0}
+                        onChange={(e) => setNewPlayer({ 
+                          ...newPlayer, 
                           stats: { 
-                            ...editPlayer.stats!, 
+                            ...newPlayer.stats!, 
                             matches: parseInt(e.target.value) || 0 
                           }
                         })}
@@ -1346,7 +1003,19 @@ export default function Players() {
                   onClick={() => {
                     setShowEditPlayerModal(false);
                     setSelectedPlayer(null);
-                    setEditPlayer({});
+                    setNewPlayer({
+                      name: '',
+                      position: 'Batsman',
+                      email: '',
+                      phone: '',
+                      year: '2025',
+                      season: 'summer',
+                      league: 'ARCL',
+                      overs: '16 overs',
+                      category: 'Adult',
+                      teamName: '',
+                      stats: { runs: 0, wickets: 0, matches: 0 }
+                    });
                   }}
                   className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
                 >
@@ -1354,7 +1023,7 @@ export default function Players() {
                 </button>
                 <button
                   onClick={handleUpdatePlayer}
-                  disabled={!editPlayer.name}
+                  disabled={!newPlayer.name?.trim()}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Update Player
@@ -1364,59 +1033,64 @@ export default function Players() {
           </div>
         )}
 
-        {/* Add Contact Modal */}
-        {showAddContactModal && selectedPlayerForContact && (
+        {/* Contact Modal */}
+        {showContactModal && selectedPlayer && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md border border-white/30">
-              <h3 className="text-2xl font-bold text-white mb-6">
-                Update Contact Info - {selectedPlayerForContact.name}
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-6">Contact: {selectedPlayer.name}</h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2">Email Address</label>
+                  <label className="block text-sm font-medium text-white/90 mb-2">Email</label>
                   <input
                     type="email"
-                    value={editForm.email}
-                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    value={newPlayer.email || ''}
+                    onChange={(e) => setNewPlayer({ ...newPlayer, email: e.target.value })}
                     className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                     placeholder="player@email.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-white/90 mb-2">Phone</label>
                   <input
                     type="tel"
-                    value={editForm.phone}
-                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    value={newPlayer.phone || ''}
+                    onChange={(e) => setNewPlayer({ ...newPlayer, phone: e.target.value })}
                     className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                     placeholder="+1-206-555-0123"
                   />
-                </div>
-
-                <div className="text-xs text-white/60">
-                  <p>• Email format: player@email.com</p>
-                  <p>• Phone format: +1-206-555-0123 or (206) 555-0123</p>
                 </div>
               </div>
               
               <div className="flex space-x-4 mt-8">
                 <button
                   onClick={() => {
-                    setShowAddContactModal(false);
-                    setSelectedPlayerForContact(null);
-                    setEditForm({ email: '', phone: '' });
+                    setShowContactModal(false);
+                    setSelectedPlayer(null);
+                    setNewPlayer({
+                      name: '',
+                      position: 'Batsman',
+                      email: '',
+                      phone: '',
+                      year: '2025',
+                      season: 'summer',
+                      league: 'ARCL',
+                      overs: '16 overs',
+                      category: 'Adult',
+                      teamName: '',
+                      stats: { runs: 0, wickets: 0, matches: 0 }
+                    });
                   }}
                   className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleSaveContactModal}
+                  onClick={handleUpdateContact}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all"
                 >
-                  Save Contact Info
+                  Update Contact
                 </button>
               </div>
             </div>

@@ -377,9 +377,16 @@ export default function Teams() {
 
   return (
     <div className="min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16">
+      {/* Hero Section with Victory Background */}
+      <section 
+        className="relative py-16 px-4 text-center mb-16 rounded-3xl overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.9), rgba(67, 56, 202, 0.9)), url('/A_group_of_cricket_players_in_team_uniforms_celebr.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="relative z-10">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
             Cricket
             <span className="bg-gradient-to-r from-orange-400 to-green-400 bg-clip-text text-transparent">
@@ -391,7 +398,9 @@ export default function Teams() {
             From ARCL's 16-over matches to NWCL's various formats, track team performance and statistics.
           </p>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto">
         {/* League Filters */}
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-12">
           <div className="flex items-center justify-between mb-6">

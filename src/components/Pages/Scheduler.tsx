@@ -228,28 +228,36 @@ export default function Scheduler() {
 
   return (
     <div className="min-h-screen py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              Cricket
-              <span className="bg-gradient-to-r from-orange-400 to-green-400 bg-clip-text text-transparent">
-                {' '}Scheduler
-              </span>
-            </h1>
-            <p className="text-white/70">Manage your cricket team's schedule and events</p>
-          </div>
-          
+      {/* Hero Section with Schedule Background */}
+      <section 
+        className="relative py-16 px-4 text-center mb-12 rounded-3xl overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.9), rgba(67, 56, 202, 0.9)), url('/A_detailed_cricket_tournament_schedule_on_a_wooden.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Cricket
+            <span className="bg-gradient-to-r from-orange-400 to-green-400 bg-clip-text text-transparent">
+              {' '}Scheduler
+            </span>
+          </h1>
+          <p className="text-xl text-white/80 max-w-2xl mx-auto mb-8">
+            Manage your cricket team's schedule and events with our comprehensive scheduling system
+          </p>
           <button
             onClick={handleAddEvent}
-            className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-2"
+            className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-2 mx-auto"
           >
             <Plus size={20} />
             <span>Add Cricket Event</span>
           </button>
         </div>
+      </section>
 
+      <div className="max-w-7xl mx-auto">
         {/* Calendar */}
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 mb-8">
           {/* Calendar Header */}
