@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Save, RotateCcw, Users, Target, Filter } from 'lucide-react';
+import { Save, RotateCcw, Users, Target, Filter, User } from 'lucide-react';
 import { Player, TeamConfig } from '../../types';
 
 interface ExtendedPlayer extends Player {
@@ -12,13 +12,12 @@ interface ExtendedPlayer extends Player {
 }
 
 export default function TeamPicker() {
-  // Extended players data with team assignments
+  // Extended players data with team assignments (images removed)
   const availablePlayers: ExtendedPlayer[] = [
     {
       id: '1',
       name: 'Rajesh Kumar',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 1250, wickets: 5, matches: 28 },
       year: '2025',
       season: 'summer',
@@ -31,7 +30,6 @@ export default function TeamPicker() {
       id: '2',
       name: 'Priya Sharma',
       position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 890, wickets: 23, matches: 30 },
       year: '2025',
       season: 'summer',
@@ -44,7 +42,6 @@ export default function TeamPicker() {
       id: '3',
       name: 'Vikram Singh',
       position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 245, wickets: 45, matches: 29 },
       year: '2025',
       season: 'summer',
@@ -57,7 +54,6 @@ export default function TeamPicker() {
       id: '4',
       name: 'Anita Patel',
       position: 'Wicket-keeper',
-      avatar: 'https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 678, wickets: 0, matches: 28 },
       year: '2025',
       season: 'summer',
@@ -70,7 +66,6 @@ export default function TeamPicker() {
       id: '5',
       name: 'Arjun Reddy',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 1456, wickets: 2, matches: 25 },
       year: '2025',
       season: 'summer',
@@ -83,7 +78,6 @@ export default function TeamPicker() {
       id: '6',
       name: 'Meera Gupta',
       position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 734, wickets: 18, matches: 27 },
       year: '2025',
       season: 'summer',
@@ -96,7 +90,6 @@ export default function TeamPicker() {
       id: '7',
       name: 'Suresh Nair',
       position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 156, wickets: 38, matches: 30 },
       year: '2025',
       season: 'summer',
@@ -109,7 +102,6 @@ export default function TeamPicker() {
       id: '8',
       name: 'Kavya Iyer',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1391498/pexels-photo-1391498.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 1123, wickets: 3, matches: 26 },
       year: '2024',
       season: 'summer',
@@ -122,7 +114,6 @@ export default function TeamPicker() {
       id: '9',
       name: 'Rohit Sharma',
       position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 567, wickets: 12, matches: 24 },
       year: '2025',
       season: 'summer',
@@ -135,7 +126,6 @@ export default function TeamPicker() {
       id: '10',
       name: 'Deepika Singh',
       position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 89, wickets: 29, matches: 27 },
       year: '2025',
       season: 'summer',
@@ -148,7 +138,6 @@ export default function TeamPicker() {
       id: '11',
       name: 'Amit Patel',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 892, wickets: 1, matches: 22 },
       year: '2025',
       season: 'summer',
@@ -161,7 +150,6 @@ export default function TeamPicker() {
       id: '12',
       name: 'Sneha Reddy',
       position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1391498/pexels-photo-1391498.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 445, wickets: 15, matches: 18 },
       year: '2025',
       season: 'summer',
@@ -174,7 +162,6 @@ export default function TeamPicker() {
       id: '13',
       name: 'Kiran Kumar',
       position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400',
       stats: { runs: 78, wickets: 32, matches: 20 },
       year: '2025',
       season: 'summer',
@@ -238,6 +225,15 @@ export default function TeamPicker() {
       case 'Wicket-keeper': return 'from-purple-500 to-pink-500';
       default: return 'from-gray-500 to-gray-600';
     }
+  };
+
+  // Generate initials from player name
+  const getPlayerInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
   };
 
   const handleDragStart = (e: React.DragEvent, player: Player) => {
@@ -404,11 +400,11 @@ export default function TeamPicker() {
                     className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/30 transition-all cursor-move hover:bg-white/10"
                   >
                     <div className="flex items-center space-x-3">
-                      <img
-                        src={player.avatar}
-                        alt={player.name}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
+                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getPositionColor(player.position)} flex items-center justify-center`}>
+                        <span className="text-white text-sm font-bold">
+                          {getPlayerInitials(player.name)}
+                        </span>
+                      </div>
                       <div className="flex-1">
                         <h3 className="text-white font-semibold">{player.name}</h3>
                         <div className={`inline-block bg-gradient-to-r ${getPositionColor(player.position)} px-2 py-1 rounded text-xs font-semibold text-white mb-1`}>
@@ -525,11 +521,11 @@ export default function TeamPicker() {
                         >
                           {player ? (
                             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 border border-white/30 text-center min-w-[100px]">
-                              <img
-                                src={player.avatar}
-                                alt={player.name}
-                                className="w-12 h-12 rounded-lg object-cover mx-auto mb-2"
-                              />
+                              <div className={`w-12 h-12 rounded-lg mx-auto mb-2 bg-gradient-to-r ${getPositionColor(player.position)} flex items-center justify-center`}>
+                                <span className="text-white text-sm font-bold">
+                                  {getPlayerInitials(player.name)}
+                                </span>
+                              </div>
                               <div className="text-white text-xs font-semibold mb-1">
                                 {player.name.split(' ')[0]}
                               </div>
@@ -572,11 +568,11 @@ export default function TeamPicker() {
                         <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
                           {index + 1}
                         </div>
-                        <img
-                          src={player.avatar}
-                          alt={player.name}
-                          className="w-10 h-10 rounded-lg object-cover"
-                        />
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${getPositionColor(player.position)} flex items-center justify-center`}>
+                          <span className="text-white text-xs font-bold">
+                            {getPlayerInitials(player.name)}
+                          </span>
+                        </div>
                         <div className="flex-1">
                           <div className="text-white font-semibold text-sm">{player.name}</div>
                           <div className="text-white/70 text-xs">{player.position}</div>

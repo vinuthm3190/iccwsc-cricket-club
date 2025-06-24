@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, Users, UserPlus, Edit3, Trash2, Save, X, CheckCircle, AlertTriangle, Crown, Star, User, Trophy, Search, Filter, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface UserAccount {
   id: string;
   username: string;
-  password: string;
   name: string;
   email: string;
   role: 'member' | 'vice' | 'captain';
@@ -36,15 +35,8 @@ interface PlayerFilters {
   category: string;
 }
 
-interface NewUserData {
-  username: string;
-  password: string;
-  confirmPassword: string;
-  role: 'member' | 'vice' | 'captain';
-}
-
 export default function Admin() {
-  const { user } = useAuth();
+  const { user, addUser, updateUser, deleteUser, getAllUsers } = useAuth();
 
   // Available teams for assignment
   const availableTeams = [
@@ -336,59 +328,21 @@ export default function Admin() {
     }
   ];
 
-  // Sample user accounts data with team assignments
-  const [userAccounts, setUserAccounts] = useState<UserAccount[]>([
-    {
-      id: '1',
-      username: 'naim.mohammad',
-      password: 'cricket123',
-      name: 'Naim Mohammad',
-      email: 'naim.mohammad@email.com',
-      role: 'captain',
-      status: 'active',
-      teamName: 'Cereal Killers',
-      createdAt: new Date('2024-01-15'),
-      lastLogin: new Date('2024-12-20')
-    },
-    {
-      id: '2',
-      username: 'priya.sharma',
-      password: 'cricket123',
-      name: 'Priya Sharma',
-      email: 'priya.sharma@email.com',
-      role: 'vice',
-      status: 'active',
-      teamName: 'Royal Warriors',
-      createdAt: new Date('2024-02-10'),
-      lastLogin: new Date('2024-12-19')
-    },
-    {
-      id: '3',
-      username: 'vikram.singh',
-      password: 'cricket123',
-      name: 'Vikram Singh',
-      email: 'vikram.singh@email.com',
-      role: 'member',
-      status: 'active',
-      teamName: 'Watermelons',
-      createdAt: new Date('2024-03-05'),
-      lastLogin: new Date('2024-12-18')
-    }
-  ]);
+  // User accounts state - now managed by AuthContext
+  const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<ExistingPlayer | null>(null);
-  const [newUserData, setNewUserData] = useState<NewUserData>({
-    username: '',
-    password: '',
-    confirmPassword: '',
-    role: 'member'
-  });
   const [editUser, setEditUser] = useState<Partial<UserAccount>>({});
   const [filterRole, setFilterRole] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
+
+  // New user creation fields
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -399,6 +353,25 @@ export default function Admin() {
     league: '',
     category: ''
   });
+
+  // Load user accounts from AuthContext on component mount
+  useEffect(() => {
+    const allUsers = getAllUsers();
+    const accounts: UserAccount[] = allUsers
+      .filter(storedUser => storedUser.user.role !== 'admin') // Exclude admin from user accounts list
+      .map(storedUser => ({
+        id: storedUser.username,
+        username: storedUser.username,
+        name: storedUser.user.name,
+        email: `${storedUser.username}@email.com`, // Default email
+        role: storedUser.user.role as 'member' | 'vice' | 'captain',
+        status: 'active' as const,
+        teamName: undefined, // Will be set based on player data
+        createdAt: new Date(),
+        lastLogin: undefined
+      }));
+    setUserAccounts(accounts);
+  }, [getAllUsers]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -437,7 +410,10 @@ export default function Admin() {
     const matchesLeague = !playerFilters.league || player.league === playerFilters.league;
     const matchesCategory = !playerFilters.category || player.category === playerFilters.category;
 
-    return matchesSearch && matchesTeam && matchesLeague && matchesCategory;
+    // Filter out players who already have user accounts
+    const hasAccount = userAccounts.some(account => account.name === player.name);
+
+    return matchesSearch && matchesTeam && matchesLeague && matchesCategory && !hasAccount;
   });
 
   // Get unique values for filter dropdowns
@@ -462,82 +438,65 @@ export default function Admin() {
   const handlePlayerSelect = (player: ExistingPlayer) => {
     setSelectedPlayer(player);
     // Auto-generate username from player name
-    const username = player.name.toLowerCase().replace(/\s+/g, '.');
-    setNewUserData(prev => ({
-      ...prev,
-      username: username,
-      password: 'cricket123', // Default password
-      confirmPassword: 'cricket123'
-    }));
+    const generatedUsername = player.name.toLowerCase().replace(/\s+/g, '.');
+    setNewUsername(generatedUsername);
   };
 
-  const validateUserForm = () => {
+  const handleCreateUserFromPlayer = (role: 'member' | 'vice' | 'captain') => {
     if (!selectedPlayer) {
       alert('Please select a player first.');
-      return false;
+      return;
     }
 
-    if (!newUserData.username.trim()) {
+    if (!newUsername.trim()) {
       alert('Please enter a username.');
-      return false;
+      return;
     }
 
-    if (!newUserData.password.trim()) {
+    if (!newPassword.trim()) {
       alert('Please enter a password.');
-      return false;
+      return;
     }
 
-    if (newUserData.password !== newUserData.confirmPassword) {
+    if (newPassword !== confirmPassword) {
       alert('Passwords do not match.');
-      return false;
+      return;
     }
 
-    if (newUserData.password.length < 6) {
+    if (newPassword.length < 6) {
       alert('Password must be at least 6 characters long.');
-      return false;
+      return;
     }
 
     // Check if username already exists
-    if (userAccounts.some(user => user.username === newUserData.username)) {
+    const allUsers = getAllUsers();
+    if (allUsers.some(u => u.username === newUsername)) {
       alert('Username already exists. Please choose a different username.');
-      return false;
+      return;
     }
 
-    // Check if user already exists for this player
-    if (userAccounts.some(user => user.name === selectedPlayer.name)) {
-      alert('A user account already exists for this player.');
-      return false;
-    }
+    // Add user to AuthContext
+    addUser(newUsername, newPassword, selectedPlayer.name, role);
 
-    return true;
-  };
-
-  const handleCreateUser = () => {
-    if (!validateUserForm()) return;
-
+    // Add to local user accounts state
     const userAccount: UserAccount = {
-      id: Date.now().toString(),
-      username: newUserData.username,
-      password: newUserData.password,
-      name: selectedPlayer!.name,
-      email: selectedPlayer!.email || `${newUserData.username}@email.com`,
-      role: newUserData.role,
+      id: newUsername,
+      username: newUsername,
+      name: selectedPlayer.name,
+      email: selectedPlayer.email || `${newUsername}@email.com`,
+      role: role,
       status: 'active',
-      teamName: selectedPlayer!.teamName,
+      teamName: selectedPlayer.teamName,
       createdAt: new Date()
     };
 
-    // Actually add the user to the state
     setUserAccounts(prev => [...prev, userAccount]);
     
     setShowAddUserModal(false);
     setSelectedPlayer(null);
-    setNewUserData({
-      username: '',
-      password: '',
-      confirmPassword: '',
-      role: 'member'
-    });
+    setNewUsername('');
+    setNewPassword('');
+    setConfirmPassword('');
     setPlayerFilters({
       search: '',
       teamName: '',
@@ -545,7 +504,15 @@ export default function Admin() {
       category: ''
     });
 
-    alert(`User account created for "${userAccount.name}" with ${userAccount.role} permissions!\n\nLogin Details:\nUsername: ${userAccount.username}\nPassword: ${userAccount.password}`);
+    alert(`User account created successfully!
+
+Login Details:
+Username: ${newUsername}
+Password: ${newPassword}
+Role: ${role.charAt(0).toUpperCase() + role.slice(1)}${role === 'vice' ? ' Captain' : ''}
+Team: ${selectedPlayer.teamName}
+
+The user can now log in with these credentials.`);
   };
 
   const handleEditUser = (user: UserAccount) => {
@@ -553,8 +520,6 @@ export default function Admin() {
     setEditUser({
       name: user.name,
       email: user.email,
-      username: user.username,
-      password: user.password,
       role: user.role,
       status: user.status,
       teamName: user.teamName
@@ -563,7 +528,7 @@ export default function Admin() {
   };
 
   const handleUpdateUser = () => {
-    if (!selectedUser || !editUser.name || !editUser.email || !editUser.username) {
+    if (!selectedUser || !editUser.name || !editUser.email) {
       alert('Please fill in all required fields.');
       return;
     }
@@ -574,14 +539,13 @@ export default function Admin() {
       return;
     }
 
-    // Check if username is unique (excluding current user)
-    if (editUser.username !== selectedUser.username && 
-        userAccounts.some(user => user.username === editUser.username)) {
-      alert('Username already exists. Please choose a different username.');
-      return;
-    }
+    // Update in AuthContext
+    updateUser(selectedUser.username, {
+      name: editUser.name,
+      role: editUser.role as any
+    });
 
-    // Actually update the user in the state
+    // Update local state
     setUserAccounts(prev => prev.map(user => 
       user.id === selectedUser.id 
         ? { ...user, ...editUser }
@@ -602,7 +566,10 @@ export default function Admin() {
     }
 
     if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-      // Actually remove the user from the state
+      // Delete from AuthContext
+      deleteUser(userId);
+      
+      // Remove from local state
       setUserAccounts(prev => prev.filter(user => user.id !== userId));
       alert(`User "${userName}" deleted successfully.`);
     }
@@ -614,7 +581,7 @@ export default function Admin() {
       return;
     }
 
-    // Actually toggle the user status in the state
+    // Update local state
     setUserAccounts(prev => prev.map(user => 
       user.id === userId 
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
@@ -827,12 +794,16 @@ export default function Admin() {
                         <div>{userAccount.lastLogin?.toLocaleDateString() || 'Never'}</div>
                       </div>
                       <div>
-                        <span className="font-semibold">Username:</span>
-                        <div className="font-mono">{userAccount.username}</div>
+                        <span className="font-semibold">Permissions:</span>
+                        <div>
+                          {userAccount.role === 'captain' && 'Full Access'}
+                          {userAccount.role === 'vice' && 'Team Management'}
+                          {userAccount.role === 'member' && 'Basic Access'}
+                        </div>
                       </div>
                       <div>
-                        <span className="font-semibold">Password:</span>
-                        <div className="font-mono">••••••••</div>
+                        <span className="font-semibold">Account ID:</span>
+                        <div className="font-mono text-xs">{userAccount.id}</div>
                       </div>
                     </div>
                   </div>
@@ -939,6 +910,7 @@ export default function Admin() {
                       <div className="text-center py-8 text-white/50">
                         <Users size={32} className="mx-auto mb-2" />
                         <p>No players found matching your filters</p>
+                        <p className="text-xs mt-1">Players with existing accounts are hidden</p>
                       </div>
                     )}
                   </div>
@@ -969,14 +941,16 @@ export default function Admin() {
                         </div>
                       </div>
 
-                      {/* User Account Details */}
+                      {/* Login Credentials */}
                       <div className="space-y-4">
+                        <h5 className="text-white font-semibold">Set Login Credentials</h5>
+                        
                         <div>
                           <label className="block text-sm font-medium text-white/90 mb-2">Username *</label>
                           <input
                             type="text"
-                            value={newUserData.username}
-                            onChange={(e) => setNewUserData({ ...newUserData, username: e.target.value })}
+                            value={newUsername}
+                            onChange={(e) => setNewUsername(e.target.value)}
                             className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                             placeholder="Enter username"
                           />
@@ -987,10 +961,10 @@ export default function Admin() {
                           <div className="relative">
                             <input
                               type={showPassword ? 'text' : 'password'}
-                              value={newUserData.password}
-                              onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
                               className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 pr-12"
-                              placeholder="Enter password"
+                              placeholder="Enter password (min 6 characters)"
                             />
                             <button
                               type="button"
@@ -1007,8 +981,8 @@ export default function Admin() {
                           <div className="relative">
                             <input
                               type={showConfirmPassword ? 'text' : 'password'}
-                              value={newUserData.confirmPassword}
-                              onChange={(e) => setNewUserData({ ...newUserData, confirmPassword: e.target.value })}
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
                               className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 pr-12"
                               placeholder="Confirm password"
                             />
@@ -1020,47 +994,58 @@ export default function Admin() {
                               {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                           </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-white/90 mb-2">Role *</label>
-                          <select
-                            value={newUserData.role}
-                            onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value as 'member' | 'vice' | 'captain' })}
-                            className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                          >
-                            <option value="member" className="bg-gray-900">Member</option>
-                            <option value="vice" className="bg-gray-900">Vice Captain</option>
-                            <option value="captain" className="bg-gray-900">Captain</option>
-                          </select>
+                          {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                            <p className="text-red-400 text-xs mt-1">Passwords do not match</p>
+                          )}
                         </div>
                       </div>
 
-                      {/* Account Preview */}
-                      <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4">
-                        <h5 className="text-white font-semibold mb-2">Account Preview</h5>
-                        <div className="text-blue-200 text-sm space-y-1">
-                          <div><strong>Name:</strong> {selectedPlayer.name}</div>
-                          <div><strong>Username:</strong> {newUserData.username}</div>
-                          <div><strong>Email:</strong> {selectedPlayer.email || `${newUserData.username}@email.com`}</div>
-                          <div><strong>Role:</strong> {newUserData.role.charAt(0).toUpperCase() + newUserData.role.slice(1)}</div>
-                          <div><strong>Team:</strong> {selectedPlayer.teamName}</div>
-                        </div>
+                      {/* Role Selection */}
+                      <div className="space-y-4">
+                        <h5 className="text-white font-semibold">Select Role for User Account</h5>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('member')}
+                          disabled={!newUsername || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          <User size={20} />
+                          <div className="text-left">
+                            <div>Create as Member</div>
+                            <div className="text-sm opacity-80">Basic access to scheduler and team info</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('vice')}
+                          disabled={!newUsername || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                          className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-xl font-semibold hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          <Star size={20} />
+                          <div className="text-left">
+                            <div>Create as Vice Captain</div>
+                            <div className="text-sm opacity-80">Team picker access and player management</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('captain')}
+                          disabled={!newUsername || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                          className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white p-4 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          <Crown size={20} />
+                          <div className="text-left">
+                            <div>Create as Captain</div>
+                            <div className="text-sm opacity-80">Full team management and event creation</div>
+                          </div>
+                        </button>
                       </div>
-
-                      <button
-                        onClick={handleCreateUser}
-                        className="w-full bg-gradient-to-r from-orange-500 to-green-600 text-white p-4 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-[1.02] flex items-center justify-center space-x-2"
-                      >
-                        <UserPlus size={20} />
-                        <span>Create User Account</span>
-                      </button>
                     </div>
                   ) : (
                     <div className="text-center py-12 text-white/50">
                       <Users size={48} className="mx-auto mb-4" />
                       <p className="text-lg">Select a cricket player from the list</p>
-                      <p className="text-sm">Choose a player to create their user account</p>
+                      <p className="text-sm">Choose a player to create their user account with custom credentials</p>
                     </div>
                   )}
                 </div>
@@ -1071,12 +1056,9 @@ export default function Admin() {
                   onClick={() => {
                     setShowAddUserModal(false);
                     setSelectedPlayer(null);
-                    setNewUserData({
-                      username: '',
-                      password: '',
-                      confirmPassword: '',
-                      role: 'member'
-                    });
+                    setNewUsername('');
+                    setNewPassword('');
+                    setConfirmPassword('');
                     setPlayerFilters({
                       search: '',
                       teamName: '',
@@ -1124,30 +1106,6 @@ export default function Admin() {
                         onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         placeholder="Enter email address"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Username *</label>
-                      <input
-                        type="text"
-                        value={editUser.username || ''}
-                        onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter username"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Password *</label>
-                      <input
-                        type="text"
-                        value={editUser.password || ''}
-                        onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter password"
                       />
                     </div>
                   </div>

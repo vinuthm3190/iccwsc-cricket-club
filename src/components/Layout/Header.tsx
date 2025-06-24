@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, User, LogOut, Shield, Bell } from 'lucide-react';
+import { Menu, X, User, LogOut, Shield, Bell, BookOpen } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../Auth/LoginModal';
 
@@ -17,6 +17,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
     { id: 'home', label: 'Home', permission: ['guest'] },
     { id: 'teams', label: 'Teams', permission: ['guest'] },
     { id: 'players', label: 'Players', permission: ['guest'] },
+    { id: 'blog', label: 'Blog', permission: ['guest'] },
     { id: 'contact', label: 'Contact', permission: ['guest'] },
     { id: 'scheduler', label: 'Scheduler', permission: ['member'] },
     { id: 'teampicker', label: 'Team Picker', permission: ['vice', 'captain'] },
@@ -54,6 +55,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                 >
                   {item.id === 'admin' && <Shield size={16} />}
                   {item.id === 'notifications' && <Bell size={16} />}
+                  {item.id === 'blog' && <BookOpen size={16} />}
                   <span>{item.label}</span>
                 </button>
               ))}
@@ -123,6 +125,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                 >
                   {item.id === 'admin' && <Shield size={16} />}
                   {item.id === 'notifications' && <Bell size={16} />}
+                  {item.id === 'blog' && <BookOpen size={16} />}
                   <span>{item.label}</span>
                 </button>
               ))}

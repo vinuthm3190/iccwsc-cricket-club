@@ -9,6 +9,7 @@ import Scheduler from './components/Pages/Scheduler';
 import TeamPicker from './components/Pages/TeamPicker';
 import Admin from './components/Pages/Admin';
 import Notifications from './components/Pages/Notifications';
+import Blog from './components/Pages/Blog';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -22,6 +23,8 @@ function AppContent() {
         return <Teams />;
       case 'players':
         return <Players />;
+      case 'blog':
+        return <Blog />;
       case 'contact':
         return <Contact />;
       case 'scheduler':

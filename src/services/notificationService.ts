@@ -1,20 +1,20 @@
 import { sendEmail, sendBulkEmails, EmailData } from './emailService';
-import { sendSMS, sendBulkSMS, SMSData, formatPhoneNumber } from './smsService';
+import { sendWhatsAppMessage, sendBulkWhatsApp, WhatsAppData, formatWhatsAppNumber } from './whatsappService';
 import { NotificationRecipient, NotificationTemplate } from '../types';
 
 export interface NotificationOptions {
   template?: NotificationTemplate;
   customSubject?: string;
   customEmailContent?: string;
-  customSmsContent?: string;
+  customWhatsappContent?: string;
   variables?: Record<string, string>;
   sendEmail?: boolean;
-  sendSms?: boolean;
+  sendWhatsapp?: boolean;
 }
 
 export interface NotificationResult {
   emailResults?: { success: number; failed: number };
-  smsResults?: { success: number; failed: number };
+  whatsappResults?: { success: number; failed: number };
   totalSent: number;
   totalFailed: number;
 }
@@ -68,17 +68,17 @@ export const sendNotificationToRecipient = async (
     }
   }
 
-  // Send SMS if enabled and recipient has phone
-  if (options.sendSms && recipient.phone && recipient.preferences.smsNotifications) {
-    const content = options.customSmsContent || options.template?.smsContent || 'ICCWSC Notification';
+  // Send WhatsApp if enabled and recipient has phone
+  if (options.sendWhatsapp && recipient.phone && recipient.preferences.whatsappNotifications) {
+    const content = options.customWhatsappContent || options.template?.whatsappContent || 'ICCWSC Notification';
     
-    const smsData: SMSData = {
-      to: formatPhoneNumber(recipient.phone),
+    const whatsappData: WhatsAppData = {
+      to: formatWhatsAppNumber(recipient.phone),
       message: replaceVariables(content, allVariables)
     };
 
-    const smsResult = await sendSMS(smsData);
-    if (smsResult.success) {
+    const whatsappResult = await sendWhatsAppMessage(whatsappData);
+    if (whatsappResult.success) {
       result.totalSent++;
     } else {
       result.totalFailed++;
@@ -130,10 +130,10 @@ export const sendBulkNotification = async (
     }
   }
 
-  // Prepare SMS data for bulk sending
-  if (options.sendSms) {
-    const smsData: SMSData[] = recipients
-      .filter(r => r.phone && r.preferences.smsNotifications)
+  // Prepare WhatsApp data for bulk sending
+  if (options.sendWhatsapp) {
+    const whatsappData: WhatsAppData[] = recipients
+      .filter(r => r.phone && r.preferences.whatsappNotifications)
       .map(recipient => {
         const allVariables = {
           ...variables,
@@ -141,19 +141,19 @@ export const sendBulkNotification = async (
           recipientName: recipient.name
         };
 
-        const content = options.customSmsContent || options.template?.smsContent || 'ICCWSC Notification';
+        const content = options.customWhatsappContent || options.template?.whatsappContent || 'ICCWSC Notification';
 
         return {
-          to: formatPhoneNumber(recipient.phone!),
+          to: formatWhatsAppNumber(recipient.phone!),
           message: replaceVariables(content, allVariables)
         };
       });
 
-    if (smsData.length > 0) {
-      const smsResults = await sendBulkSMS(smsData);
-      result.smsResults = smsResults;
-      result.totalSent += smsResults.success;
-      result.totalFailed += smsResults.failed;
+    if (whatsappData.length > 0) {
+      const whatsappResults = await sendBulkWhatsApp(whatsappData);
+      result.whatsappResults = whatsappResults;
+      result.totalSent += whatsappResults.success;
+      result.totalFailed += whatsappResults.failed;
     }
   }
 
@@ -195,10 +195,24 @@ Please arrive 30 minutes early for warm-up.
 
 Best regards,
 ICCWSC Team`,
-    customSmsContent: `Cricket match tomorrow! ${matchDetails.teamName} vs ${matchDetails.opponent} at ${matchDetails.time}, ${matchDetails.location}. Arrive 30 min early. Good luck!`,
+    customWhatsappContent: `🏏 Cricket Match Reminder
+
+Hi {{playerName}}!
+
+Match Details:
+🏏 ${matchDetails.teamName} vs ${matchDetails.opponent}
+📅 ${matchDetails.date}
+⏰ ${matchDetails.time}
+📍 ${matchDetails.location}
+
+Please arrive 30 minutes early for warm-up.
+
+Good luck! 🏆
+
+- ICCWSC Team`,
     variables,
     sendEmail: true,
-    sendSms: true
+    sendWhatsapp: true
   };
 
   // Filter recipients who want match reminders
@@ -240,10 +254,24 @@ Bring your cricket gear and water bottle.
 
 See you on the field!
 ICCWSC`,
-    customSmsContent: `Cricket practice ${practiceDetails.date} at ${practiceDetails.time}, ${practiceDetails.location}. Focus: ${practiceDetails.description || 'Regular practice'}. Bring gear!`,
+    customWhatsappContent: `🏃‍♂️ Cricket Practice
+
+Hi {{playerName}}!
+
+Practice Session:
+📅 ${practiceDetails.date}
+⏰ ${practiceDetails.time}
+📍 ${practiceDetails.location}
+🎯 Focus: ${practiceDetails.description || 'Regular practice'}
+
+Bring your cricket gear and water bottle.
+
+See you on the field! 🏏
+
+- ICCWSC`,
     variables,
     sendEmail: true,
-    sendSms: true
+    sendWhatsapp: true
   };
 
   // Filter recipients who want practice reminders

@@ -43,16 +43,15 @@ export interface NotificationTemplate {
   name: string;
   subject: string;
   emailContent: string;
-  smsContent: string;
+  whatsappContent: string;
   type: 'match' | 'practice' | 'meeting' | 'general';
   variables: string[];
 }
 
 export interface NotificationSettings {
   emailEnabled: boolean;
-  smsEnabled: boolean;
+  whatsappEnabled: boolean;
   emailProvider: 'emailjs' | 'sendgrid' | 'mailgun';
-  smsProvider: 'twilio' | 'nexmo';
   templates: NotificationTemplate[];
 }
 
@@ -64,7 +63,7 @@ export interface NotificationRecipient {
   teams: string[];
   preferences: {
     emailNotifications: boolean;
-    smsNotifications: boolean;
+    whatsappNotifications: boolean;
     matchReminders: boolean;
     practiceReminders: boolean;
     generalUpdates: boolean;
@@ -73,11 +72,53 @@ export interface NotificationRecipient {
 
 export interface NotificationLog {
   id: string;
-  type: 'email' | 'sms';
+  type: 'email' | 'whatsapp';
   recipient: string;
   subject: string;
   content: string;
   status: 'sent' | 'failed' | 'pending';
   sentAt: Date;
   eventId?: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  author: {
+    name: string;
+    username: string;
+    role: string;
+  };
+  category: 'match-report' | 'player-spotlight' | 'team-news' | 'training-tips' | 'community' | 'general';
+  tags: string[];
+  publishedAt: Date;
+  updatedAt?: Date;
+  isPublished: boolean;
+  likes: number;
+  comments: BlogComment[];
+  readTime: number;
+  featuredImage?: string;
+}
+
+export interface BlogComment {
+  id: string;
+  content: string;
+  author: {
+    name: string;
+    username: string;
+    role: string;
+  };
+  createdAt: Date;
+  likes: number;
+  replies: BlogComment[];
+}
+
+export interface BlogFilters {
+  category: string;
+  author: string;
+  tag: string;
+  search: string;
+  sortBy: 'newest' | 'oldest' | 'popular' | 'trending';
 }
