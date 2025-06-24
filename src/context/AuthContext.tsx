@@ -16,21 +16,6 @@ const demoUsers: Record<string, User> = {
     username: 'admin',
     role: 'admin',
     name: 'System Administrator'
-  },
-  'captain': {
-    username: 'captain',
-    role: 'captain',
-    name: 'Alex Johnson'
-  },
-  'vice': {
-    username: 'vice',
-    role: 'vice',
-    name: 'Sarah Martinez'
-  },
-  'member': {
-    username: 'member',
-    role: 'member',
-    name: 'Mike Thompson'
   }
 };
 
@@ -53,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (username: string, password: string): boolean => {
-    if (demoUsers[username] && password === 'pass123') {
+    if (demoUsers[username] && password === 'Casper@2022') {
       const loggedInUser = demoUsers[username];
       setUser(loggedInUser);
       localStorage.setItem('sportsClubUser', JSON.stringify(loggedInUser));

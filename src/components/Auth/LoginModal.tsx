@@ -30,7 +30,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setIsLoading(false);
       onClose();
     } else {
-      setError('Invalid credentials. Try: admin/pass123, captain/pass123, vice/pass123, or member/pass123');
+      setError('Invalid username or password. Please check your credentials and try again.');
       setIsLoading(false);
     }
   };
@@ -103,16 +103,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-
-        <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/20">
-          <h3 className="text-sm font-semibold text-white/90 mb-2">Demo Accounts:</h3>
-          <div className="text-xs text-white/70 space-y-1">
-            <div>• admin / pass123 (System Admin)</div>
-            <div>• captain / pass123 (Full access)</div>
-            <div>• vice / pass123 (Vice Captain)</div>
-            <div>• member / pass123 (Team Member)</div>
-          </div>
-        </div>
       </div>
     </div>
   );
