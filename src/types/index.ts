@@ -1,6 +1,6 @@
 export interface User {
   username: string;
-  role: 'guest' | 'member' | 'vice' | 'captain';
+  role: 'guest' | 'member' | 'vice' | 'captain' | 'admin';
   name: string;
 }
 

@@ -7,6 +7,7 @@ import Players from './components/Pages/Players';
 import Contact from './components/Pages/Contact';
 import Scheduler from './components/Pages/Scheduler';
 import TeamPicker from './components/Pages/TeamPicker';
+import Admin from './components/Pages/Admin';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -15,7 +16,7 @@ function AppContent() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <Home />;
+        return <Home onNavigate={setCurrentPage} />;
       case 'teams':
         return <Teams />;
       case 'players':
@@ -23,11 +24,13 @@ function AppContent() {
       case 'contact':
         return <Contact />;
       case 'scheduler':
-        return hasPermission(['member']) ? <Scheduler /> : <Home />;
+        return hasPermission(['member']) ? <Scheduler /> : <Home onNavigate={setCurrentPage} />;
       case 'teampicker':
-        return hasPermission(['vice', 'captain']) ? <TeamPicker /> : <Home />;
+        return hasPermission(['vice', 'captain']) ? <TeamPicker /> : <Home onNavigate={setCurrentPage} />;
+      case 'admin':
+        return hasPermission(['admin']) ? <Admin /> : <Home onNavigate={setCurrentPage} />;
       default:
-        return <Home />;
+        return <Home onNavigate={setCurrentPage} />;
     }
   };
 

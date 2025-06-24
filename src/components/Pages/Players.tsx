@@ -49,6 +49,23 @@ export default function Players() {
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [newPlayer, setNewPlayer] = useState<NewPlayerData>({});
+  const [customYear, setCustomYear] = useState('');
+  const [useCustomYear, setUseCustomYear] = useState(false);
+
+  // Generate dynamic year options (current year ± 5 years)
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    
+    // Add past 5 years, current year, and future 5 years
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push(i.toString());
+    }
+    
+    return years;
+  };
+
+  const yearOptions = generateYearOptions();
 
   // Available teams for dropdown - Updated with all NWCL combinations
   const availableTeams = [
@@ -74,68 +91,69 @@ export default function Players() {
     { name: 'Solaris', league: 'NWCL', overs: 'T40', category: 'Youth' }
   ];
 
-  // Extended players data with team assignments - Updated with new NWCL teams
+  // Extended players data with team assignments - Updated with Cereal Killers players and no images
   const players: ExtendedPlayer[] = [
+    // Cereal Killers players (Spring 2025)
     {
       id: '1',
-      name: 'Rajesh Kumar',
+      name: 'Naim Mohammad',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400',
+      avatar: '',
       stats: { runs: 1250, wickets: 5, matches: 28 },
       year: '2025',
-      season: 'summer',
+      season: 'spring',
       league: 'ARCL',
       overs: '16 overs',
       category: 'Adult',
-      teamName: 'Angry Bulls'
+      teamName: 'Cereal Killers'
     },
     {
       id: '2',
-      name: 'Priya Sharma',
-      position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 890, wickets: 23, matches: 30 },
+      name: 'Dhruva Kumar',
+      position: 'Batsman',
+      avatar: '',
+      stats: { runs: 890, wickets: 2, matches: 25 },
       year: '2025',
-      season: 'summer',
+      season: 'spring',
       league: 'ARCL',
       overs: '16 overs',
       category: 'Adult',
-      teamName: 'Royal Warriors'
+      teamName: 'Cereal Killers'
     },
     {
       id: '3',
-      name: 'Vikram Singh',
-      position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 245, wickets: 45, matches: 29 },
+      name: 'Darshan Masti Prakash',
+      position: 'All-rounder',
+      avatar: '',
+      stats: { runs: 734, wickets: 18, matches: 27 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
       category: 'Adult',
-      teamName: 'Watermelons'
+      teamName: 'Cereal Killers'
     },
     {
       id: '4',
-      name: 'Anita Patel',
-      position: 'Wicket-keeper',
-      avatar: 'https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 678, wickets: 0, matches: 28 },
+      name: 'Vinuth Muniraju',
+      position: 'Bowler',
+      avatar: '',
+      stats: { runs: 156, wickets: 38, matches: 30 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
       category: 'Adult',
-      teamName: 'Solaris'
+      teamName: 'Cereal Killers'
     },
     {
       id: '5',
-      name: 'Arjun Reddy',
+      name: 'Uday C',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 1456, wickets: 2, matches: 25 },
+      avatar: '',
+      stats: { runs: 1123, wickets: 3, matches: 26 },
       year: '2025',
-      season: 'summer',
+      season: 'spring',
       league: 'ARCL',
       overs: '16 overs',
       category: 'Adult',
@@ -143,108 +161,120 @@ export default function Players() {
     },
     {
       id: '6',
-      name: 'Meera Gupta',
+      name: 'Vidhyadhar Ghorpade',
       position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 734, wickets: 18, matches: 27 },
+      avatar: '',
+      stats: { runs: 567, wickets: 12, matches: 24 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Youth',
-      teamName: 'Watermelons'
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      teamName: 'Cereal Killers'
     },
     {
       id: '7',
-      name: 'Suresh Nair',
+      name: 'Vijeth Shetty',
       position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 156, wickets: 38, matches: 30 },
+      avatar: '',
+      stats: { runs: 89, wickets: 29, matches: 27 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T40',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
       category: 'Adult',
-      teamName: 'Solaris'
+      teamName: 'Cereal Killers'
     },
     {
       id: '8',
-      name: 'Kavya Iyer',
+      name: 'Kiran S',
       position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1391498/pexels-photo-1391498.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 1123, wickets: 3, matches: 26 },
-      year: '2024',
-      season: 'summer',
+      avatar: '',
+      stats: { runs: 892, wickets: 1, matches: 22 },
+      year: '2025',
+      season: 'spring',
       league: 'ARCL',
       overs: '16 overs',
       category: 'Adult',
-      teamName: 'Angry Bulls'
+      teamName: 'Cereal Killers'
     },
     {
       id: '9',
-      name: 'Rohit Sharma',
-      position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 567, wickets: 12, matches: 24 },
+      name: 'Manjunatha Shetty Kondalli',
+      position: 'Wicket-keeper',
+      avatar: '',
+      stats: { runs: 678, wickets: 0, matches: 28 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Youth',
-      teamName: 'Watermelons'
-    },
-    {
-      id: '10',
-      name: 'Deepika Singh',
-      position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 89, wickets: 29, matches: 27 },
-      year: '2025',
-      season: 'summer',
+      season: 'spring',
       league: 'ARCL',
       overs: '16 overs',
       category: 'Adult',
-      teamName: 'Royal Warriors'
+      teamName: 'Cereal Killers'
     },
-    // Additional NWCL players for different formats
+    {
+      id: '10',
+      name: 'Raj Mani N',
+      position: 'All-rounder',
+      avatar: '',
+      stats: { runs: 445, wickets: 15, matches: 18 },
+      year: '2025',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      teamName: 'Cereal Killers'
+    },
     {
       id: '11',
-      name: 'Amit Patel',
-      position: 'Batsman',
-      avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 892, wickets: 1, matches: 22 },
+      name: 'Arun Thippur Jayakeerthy',
+      position: 'Bowler',
+      avatar: '',
+      stats: { runs: 78, wickets: 32, matches: 20 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
       category: 'Adult',
-      teamName: 'Solaris'
+      teamName: 'Cereal Killers'
     },
     {
       id: '12',
-      name: 'Sneha Reddy',
-      position: 'All-rounder',
-      avatar: 'https://images.pexels.com/photos/1391498/pexels-photo-1391498.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 445, wickets: 15, matches: 18 },
+      name: 'Avinash Talanki',
+      position: 'Batsman',
+      avatar: '',
+      stats: { runs: 1456, wickets: 2, matches: 25 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Youth',
-      teamName: 'Solaris'
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      teamName: 'Cereal Killers'
     },
     {
       id: '13',
-      name: 'Kiran Kumar',
-      position: 'Bowler',
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400',
-      stats: { runs: 78, wickets: 32, matches: 20 },
+      name: 'Dhanush Shetty CK',
+      position: 'All-rounder',
+      avatar: '',
+      stats: { runs: 245, wickets: 45, matches: 29 },
       year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T40',
-      category: 'Youth',
-      teamName: 'Watermelons'
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      teamName: 'Cereal Killers'
+    },
+    {
+      id: '14',
+      name: 'Siva Krapa',
+      position: 'Bowler',
+      avatar: '',
+      stats: { runs: 156, wickets: 38, matches: 30 },
+      year: '2025',
+      season: 'spring',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      teamName: 'Cereal Killers'
     }
   ];
 
@@ -276,20 +306,6 @@ export default function Players() {
       if (category && team.category !== category) return false;
       return true;
     });
-  };
-
-  // Get unique team names for filter dropdown
-  const getUniqueTeamNames = () => {
-    const teamNames = new Set<string>();
-    
-    // Filter teams based on current league/overs/category filters
-    const filteredTeams = getAvailableTeams(filters.league, filters.overs, filters.category);
-    
-    filteredTeams.forEach(team => {
-      teamNames.add(team.name);
-    });
-    
-    return Array.from(teamNames).sort();
   };
 
   // Filter players based on current filters
@@ -352,8 +368,55 @@ export default function Players() {
     });
   };
 
+  // Handle year selection (either from dropdown or custom input)
+  const handleYearChange = (value: string) => {
+    if (value === 'custom') {
+      setUseCustomYear(true);
+      setNewPlayer(prev => ({ ...prev, year: customYear }));
+    } else {
+      setUseCustomYear(false);
+      setCustomYear('');
+      setNewPlayer(prev => ({ ...prev, year: value }));
+    }
+  };
+
+  // Handle custom year input
+  const handleCustomYearChange = (value: string) => {
+    // Only allow numeric input for years
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    // Limit to 4 digits
+    if (numericValue.length <= 4) {
+      setCustomYear(numericValue);
+      setNewPlayer(prev => ({ ...prev, year: numericValue }));
+    }
+  };
+
+  // Validate custom year
+  const isValidCustomYear = (year: string) => {
+    const yearNum = parseInt(year);
+    const currentYear = new Date().getFullYear();
+    return year.length === 4 && yearNum >= 1900 && yearNum <= currentYear + 10;
+  };
+
   const handleAddPlayer = () => {
-    if (!newPlayer.name || !newPlayer.position || !newPlayer.year || !newPlayer.season || 
+    // Validate year selection
+    let selectedYear = '';
+    if (useCustomYear) {
+      if (!customYear || !isValidCustomYear(customYear)) {
+        alert('Please enter a valid 4-digit year (1900 - ' + (new Date().getFullYear() + 10) + ').');
+        return;
+      }
+      selectedYear = customYear;
+    } else {
+      if (!newPlayer.year) {
+        alert('Please select a year.');
+        return;
+      }
+      selectedYear = newPlayer.year;
+    }
+
+    if (!newPlayer.name || !newPlayer.position || !newPlayer.season || 
         !newPlayer.league || !newPlayer.overs || !newPlayer.category || !newPlayer.teamName) {
       alert('Please fill in all required fields including team assignment details.');
       return;
@@ -363,7 +426,7 @@ export default function Players() {
       id: Date.now().toString(),
       name: newPlayer.name,
       position: newPlayer.position as Player['position'],
-      avatar: newPlayer.avatar || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400',
+      avatar: '',
       stats: {
         runs: parseInt(newPlayer.stats?.runs?.toString() || '0'),
         wickets: parseInt(newPlayer.stats?.wickets?.toString() || '0'),
@@ -373,7 +436,7 @@ export default function Players() {
 
     console.log('Adding new player:', player);
     console.log('Team assignment:', {
-      year: newPlayer.year,
+      year: selectedYear,
       season: newPlayer.season,
       league: newPlayer.league,
       overs: newPlayer.overs,
@@ -381,10 +444,12 @@ export default function Players() {
       teamName: newPlayer.teamName
     });
     
-    alert(`Player "${player.name}" added successfully to team "${newPlayer.teamName}" in ${newPlayer.league} ${newPlayer.overs} ${newPlayer.category} league for ${newPlayer.year} ${newPlayer.season}!`);
+    alert(`Player "${player.name}" added successfully to team "${newPlayer.teamName}" in ${newPlayer.league} ${newPlayer.overs} ${newPlayer.category} league for ${selectedYear} ${newPlayer.season}!`);
     
     setShowAddPlayerModal(false);
     setNewPlayer({});
+    setUseCustomYear(false);
+    setCustomYear('');
   };
 
   const handleEditPlayer = (player: ExtendedPlayer) => {
@@ -560,7 +625,7 @@ export default function Players() {
               </select>
             </div>
 
-            {/* Team Name - Simplified to show just team names */}
+            {/* Team Name */}
             <div>
               <label className="block text-sm font-medium text-white/90 mb-2">Team</label>
               <select
@@ -569,9 +634,9 @@ export default function Players() {
                 className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
               >
                 <option value="" className="bg-gray-900">All Teams</option>
-                {getUniqueTeamNames().map(teamName => (
-                  <option key={teamName} value={teamName} className="bg-gray-900">
-                    {teamName}
+                {getAvailableTeams(filters.league, filters.overs, filters.category).map((team, index) => (
+                  <option key={`${team.name}-${team.overs}-${team.category}-${index}`} value={team.name} className="bg-gray-900">
+                    {team.name} ({team.overs} {team.category})
                   </option>
                 ))}
               </select>
@@ -667,20 +732,28 @@ export default function Players() {
                 .map((player) => (
                 <div
                   key={player.id}
-                  className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:border-white/40 transition-all duration-500 hover:transform hover:scale-105 relative"
+                  className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:border-white/40 transition-all duration-300 relative"
                 >
-                  {/* Management Actions - Only visible to captain/vice */}
+                  {/* Management Actions - Only visible to captain/vice - Fixed positioning and hover */}
                   {canManagePlayers && (
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                    <div className="absolute top-4 right-4 flex space-x-2 z-10">
                       <button
-                        onClick={() => handleEditPlayer(player)}
-                        className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPlayer(player);
+                        }}
+                        className="p-2 bg-blue-500/80 text-blue-100 rounded-lg hover:bg-blue-500 transition-colors backdrop-blur-sm border border-blue-400/50 shadow-lg"
+                        title="Edit Player"
                       >
                         <Edit3 size={14} />
                       </button>
                       <button
-                        onClick={() => handleRemovePlayer(player.id, player.name)}
-                        className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemovePlayer(player.id, player.name);
+                        }}
+                        className="p-2 bg-red-500/80 text-red-100 rounded-lg hover:bg-red-500 transition-colors backdrop-blur-sm border border-red-400/50 shadow-lg"
+                        title="Remove Player"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -688,11 +761,18 @@ export default function Players() {
                   )}
 
                   <div className="relative mb-6">
-                    <img
-                      src={player.avatar}
-                      alt={player.name}
-                      className="w-24 h-24 rounded-2xl mx-auto object-cover border-4 border-white/20 group-hover:border-white/40 transition-all"
-                    />
+                    {/* Player Avatar - Show placeholder when no image */}
+                    {player.avatar ? (
+                      <img
+                        src={player.avatar}
+                        alt={player.name}
+                        className="w-24 h-24 rounded-2xl mx-auto object-cover border-4 border-white/20 group-hover:border-white/40 transition-all"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-2xl mx-auto bg-gradient-to-br from-gray-500 to-gray-600 border-4 border-white/20 group-hover:border-white/40 transition-all flex items-center justify-center">
+                        <Users className="text-white/70" size={32} />
+                      </div>
+                    )}
                     <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r ${getPositionColor(player.position)} px-3 py-1 rounded-full text-xs font-semibold text-white`}>
                       {player.position}
                     </div>
@@ -752,19 +832,59 @@ export default function Players() {
                   </h4>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Year */}
+                    {/* Enhanced Year Selection */}
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-2">Year *</label>
-                      <select
-                        value={newPlayer.year || ''}
-                        onChange={(e) => handleNewPlayerFilterChange('year', e.target.value)}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      >
-                        <option value="" className="bg-gray-900">Select year</option>
-                        <option value="2025" className="bg-gray-900">2025</option>
-                        <option value="2024" className="bg-gray-900">2024</option>
-                        <option value="2023" className="bg-gray-900">2023</option>
-                      </select>
+                      {!useCustomYear ? (
+                        <select
+                          value={newPlayer.year || ''}
+                          onChange={(e) => handleYearChange(e.target.value)}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                          <option value="" className="bg-gray-900">Select year</option>
+                          {yearOptions.map(year => (
+                            <option key={year} value={year} className="bg-gray-900">{year}</option>
+                          ))}
+                          <option value="custom" className="bg-gray-900 text-orange-300">✏️ Enter Custom Year</option>
+                        </select>
+                      ) : (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={customYear}
+                            onChange={(e) => handleCustomYearChange(e.target.value)}
+                            className={`w-full px-4 py-3 bg-white/10 border ${
+                              customYear && !isValidCustomYear(customYear) 
+                                ? 'border-red-500' 
+                                : 'border-white/30'
+                            } rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400`}
+                            placeholder="Enter 4-digit year (e.g., 2026)"
+                            maxLength={4}
+                          />
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => {
+                                setUseCustomYear(false);
+                                setCustomYear('');
+                                setNewPlayer(prev => ({ ...prev, year: '' }));
+                              }}
+                              className="text-xs bg-white/10 text-white px-3 py-1 rounded-lg hover:bg-white/20 transition-colors"
+                            >
+                              ← Back to List
+                            </button>
+                            {customYear && isValidCustomYear(customYear) && (
+                              <span className="text-xs text-green-400 flex items-center">
+                                ✓ Valid year
+                              </span>
+                            )}
+                            {customYear && !isValidCustomYear(customYear) && (
+                              <span className="text-xs text-red-400 flex items-center">
+                                ✗ Invalid year (1900-{new Date().getFullYear() + 10})
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Season */}
@@ -776,8 +896,10 @@ export default function Players() {
                         className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
                       >
                         <option value="" className="bg-gray-900">Select season</option>
-                        <option value="summer" className="bg-gray-900">Summer</option>
                         <option value="spring" className="bg-gray-900">Spring</option>
+                        <option value="summer" className="bg-gray-900">Summer</option>
+                        <option value="fall" className="bg-gray-900">Fall</option>
+                        <option value="winter" className="bg-gray-900">Winter</option>
                       </select>
                     </div>
 
@@ -843,6 +965,19 @@ export default function Players() {
                       </select>
                     </div>
                   </div>
+
+                  {/* Year Selection Helper */}
+                  <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                    <div className="flex items-center space-x-2 text-blue-300 text-sm">
+                      <Trophy size={16} />
+                      <span className="font-semibold">Year Selection Options:</span>
+                    </div>
+                    <div className="text-blue-200 text-xs mt-1 space-y-1">
+                      <div>• <strong>Dropdown:</strong> Choose from {new Date().getFullYear() - 5} to {new Date().getFullYear() + 5}</div>
+                      <div>• <strong>Custom Entry:</strong> Enter any year from 1900 to {new Date().getFullYear() + 10}</div>
+                      <div>• <strong>Current Year:</strong> {new Date().getFullYear()}</div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Player Details Section */}
@@ -877,17 +1012,6 @@ export default function Players() {
                         <option value="Bowler" className="bg-gray-900">Bowler</option>
                         <option value="Wicket-keeper" className="bg-gray-900">Wicket-keeper</option>
                       </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Avatar URL (Optional)</label>
-                      <input
-                        type="url"
-                        value={newPlayer.avatar || ''}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, avatar: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="https://example.com/avatar.jpg"
-                      />
                     </div>
 
                     <div className="grid grid-cols-3 gap-4">
@@ -952,14 +1076,29 @@ export default function Players() {
               
               <div className="flex space-x-4 mt-8">
                 <button
-                  onClick={() => setShowAddPlayerModal(false)}
+                  onClick={() => {
+                    setShowAddPlayerModal(false);
+                    setNewPlayer({});
+                    setUseCustomYear(false);
+                    setCustomYear('');
+                  }}
                   className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddPlayer}
-                  disabled={!newPlayer.name || !newPlayer.position || !newPlayer.year || !newPlayer.season || !newPlayer.league || !newPlayer.overs || !newPlayer.category || !newPlayer.teamName}
+                  disabled={
+                    !newPlayer.name || 
+                    !newPlayer.position || 
+                    (!useCustomYear && !newPlayer.year) ||
+                    (useCustomYear && (!customYear || !isValidCustomYear(customYear))) ||
+                    !newPlayer.season || 
+                    !newPlayer.league || 
+                    !newPlayer.overs || 
+                    !newPlayer.category || 
+                    !newPlayer.teamName
+                  }
                   className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add Player

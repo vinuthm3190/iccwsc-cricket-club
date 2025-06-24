@@ -12,6 +12,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const demoUsers: Record<string, User> = {
+  'admin': {
+    username: 'admin',
+    role: 'admin',
+    name: 'System Administrator'
+  },
   'captain': {
     username: 'captain',
     role: 'captain',
@@ -33,7 +38,8 @@ const roleHierarchy = {
   'guest': 0,
   'member': 1,
   'vice': 2,
-  'captain': 3
+  'captain': 3,
+  'admin': 4
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,11 @@
 import React from 'react';
 import { Heart, Users, Trophy, Calendar, Globe, Star, MapPin, Handshake } from 'lucide-react';
 
-export default function Home() {
+interface HomeProps {
+  onNavigate?: (page: string) => void;
+}
+
+export default function Home({ onNavigate }: HomeProps) {
   const features = [
     {
       icon: Heart,
@@ -91,13 +95,59 @@ export default function Home() {
     }
   ];
 
+  const handleJoinCricketFamily = () => {
+    if (onNavigate) {
+      onNavigate('contact');
+    } else {
+      // Fallback for when onNavigate is not available
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // If no contact section, show alert with contact info
+        alert('Ready to join our cricket family? Contact us at info@iccwsc.com or visit our Contact page for more information!');
+      }
+    }
+  };
+
+  const handleLearnAboutCricket = () => {
+    if (onNavigate) {
+      onNavigate('teams');
+    } else {
+      // Fallback - scroll to features section
+      const featuresSection = document.getElementById('features');
+      if (featuresSection) {
+        featuresSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Show cricket info
+        alert('Cricket is the gentleman\'s game! Explore our Teams page to learn about different formats: T10, T20, T40, and 16-over matches. We welcome players of all skill levels!');
+      }
+    }
+  };
+
+  const handleStartPlayingCricket = () => {
+    if (onNavigate) {
+      onNavigate('contact');
+    } else {
+      alert('Ready to start playing cricket? Contact us at info@iccwsc.com or call +1 (206) 555-CRICKET to join our cricket community!');
+    }
+  };
+
+  const handleContactUs = () => {
+    if (onNavigate) {
+      onNavigate('contact');
+    } else {
+      alert('Contact ICCWSC:\n\nEmail: info@iccwsc.com\nPhone: +1 (206) 555-CRICKET\nLocation: Marymoor Park Cricket Ground, Redmond, WA\n\nVisit our Contact page for more details!');
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Cricket Background Image */}
       <section 
         className="relative py-32 px-4 text-center min-h-screen flex items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/ChatGPT Image Jun 23, 2025, 07_00_34 PM.png')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://images.pexels.com/photos/163452/basketball-dunk-blue-game-163452.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
@@ -124,10 +174,16 @@ export default function Home() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-2xl backdrop-blur-sm">
+            <button 
+              onClick={handleJoinCricketFamily}
+              className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-2xl backdrop-blur-sm"
+            >
               Join Our Cricket Family
             </button>
-            <button className="bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all transform hover:scale-105 border border-white/30 shadow-xl">
+            <button 
+              onClick={handleLearnAboutCricket}
+              className="bg-white/20 backdrop-blur-lg text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all transform hover:scale-105 border border-white/30 shadow-xl"
+            >
               Learn About Cricket
             </button>
           </div>
@@ -171,7 +227,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      <section id="features" className="py-20 px-4 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -348,10 +404,16 @@ export default function Home() {
               for you in our cricket community. Come play the game we all love in the heart of Seattle.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-2xl">
+              <button 
+                onClick={handleStartPlayingCricket}
+                className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-2xl"
+              >
                 Start Playing Cricket
               </button>
-              <button className="bg-white/20 backdrop-blur-sm text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all transform hover:scale-105 border border-white/30">
+              <button 
+                onClick={handleContactUs}
+                className="bg-white/20 backdrop-blur-sm text-white px-12 py-4 rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all transform hover:scale-105 border border-white/30"
+              >
                 Contact Us
               </button>
             </div>
