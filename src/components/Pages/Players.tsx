@@ -48,7 +48,10 @@ export default function Players() {
   });
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
+  const [showEditPlayerModal, setShowEditPlayerModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<ExtendedPlayer | null>(null);
   const [newPlayer, setNewPlayer] = useState<NewPlayerData>({});
+  const [editPlayer, setEditPlayer] = useState<Partial<ExtendedPlayer>>({});
   const [customYear, setCustomYear] = useState('');
   const [useCustomYear, setUseCustomYear] = useState(false);
 
@@ -92,7 +95,7 @@ export default function Players() {
   ];
 
   // Extended players data with team assignments - Updated with Cereal Killers players and no images
-  const players: ExtendedPlayer[] = [
+  const [players, setPlayers] = useState<ExtendedPlayer[]>([
     // Cereal Killers players (Spring 2025)
     {
       id: '1',
@@ -276,7 +279,7 @@ export default function Players() {
       category: 'Adult',
       teamName: 'Cereal Killers'
     }
-  ];
+  ]);
 
   const getPositionColor = (position: string) => {
     switch (position) {
@@ -325,7 +328,7 @@ export default function Players() {
       return matchesYear && matchesSeason && matchesLeague && matchesOvers && 
              matchesCategory && matchesPosition && matchesTeamName && matchesSearch;
     });
-  }, [filters]);
+  }, [filters, players]);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof PlayerFilters, value: string) => {
@@ -422,7 +425,7 @@ export default function Players() {
       return;
     }
 
-    const player: Player = {
+    const player: ExtendedPlayer = {
       id: Date.now().toString(),
       name: newPlayer.name,
       position: newPlayer.position as Player['position'],
@@ -431,37 +434,68 @@ export default function Players() {
         runs: parseInt(newPlayer.stats?.runs?.toString() || '0'),
         wickets: parseInt(newPlayer.stats?.wickets?.toString() || '0'),
         matches: parseInt(newPlayer.stats?.matches?.toString() || '0')
-      }
-    };
-
-    console.log('Adding new player:', player);
-    console.log('Team assignment:', {
+      },
       year: selectedYear,
       season: newPlayer.season,
       league: newPlayer.league,
       overs: newPlayer.overs,
       category: newPlayer.category,
       teamName: newPlayer.teamName
-    });
-    
-    alert(`Player "${player.name}" added successfully to team "${newPlayer.teamName}" in ${newPlayer.league} ${newPlayer.overs} ${newPlayer.category} league for ${selectedYear} ${newPlayer.season}!`);
+    };
+
+    // Actually add the player to the state
+    setPlayers(prev => [...prev, player]);
     
     setShowAddPlayerModal(false);
     setNewPlayer({});
     setUseCustomYear(false);
     setCustomYear('');
+
+    alert(`Player "${player.name}" added successfully to team "${player.teamName}" in ${player.league} ${player.overs} ${player.category} league for ${player.year} ${player.season}!`);
   };
 
   const handleEditPlayer = (player: ExtendedPlayer) => {
     if (!canManagePlayers) return;
-    console.log('Editing player:', player);
-    alert(`Edit functionality for ${player.name} would open here.`);
+    setSelectedPlayer(player);
+    setEditPlayer({
+      name: player.name,
+      position: player.position,
+      year: player.year,
+      season: player.season,
+      league: player.league,
+      overs: player.overs,
+      category: player.category,
+      teamName: player.teamName,
+      stats: player.stats
+    });
+    setShowEditPlayerModal(true);
+  };
+
+  const handleUpdatePlayer = () => {
+    if (!selectedPlayer || !editPlayer.name || !editPlayer.position) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    // Update the player in the state
+    setPlayers(prev => prev.map(player => 
+      player.id === selectedPlayer.id 
+        ? { ...player, ...editPlayer } as ExtendedPlayer
+        : player
+    ));
+
+    setShowEditPlayerModal(false);
+    setSelectedPlayer(null);
+    setEditPlayer({});
+
+    alert(`Player "${editPlayer.name}" updated successfully!`);
   };
 
   const handleRemovePlayer = (playerId: string, playerName: string) => {
     if (!canManagePlayers) return;
     if (confirm(`Are you sure you want to remove ${playerName} from the team?`)) {
-      console.log('Removing player:', playerId);
+      // Actually remove the player from the state
+      setPlayers(prev => prev.filter(player => player.id !== playerId));
       alert(`Player "${playerName}" removed successfully!`);
     }
   };
@@ -1102,6 +1136,127 @@ export default function Players() {
                   className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add Player
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Player Modal */}
+        {showEditPlayerModal && selectedPlayer && canManagePlayers && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/30 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-2xl font-bold text-white mb-6">Edit Player: {selectedPlayer.name}</h3>
+              
+              <div className="space-y-6">
+                {/* Player Details Section */}
+                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+                  <h4 className="text-lg font-semibold text-white mb-4">Player Details</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Player Name *</label>
+                      <input
+                        type="text"
+                        value={editPlayer.name || ''}
+                        onChange={(e) => setEditPlayer({ ...editPlayer, name: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="Enter player name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-white/90 mb-2">Position *</label>
+                      <select
+                        value={editPlayer.position || ''}
+                        onChange={(e) => setEditPlayer({ ...editPlayer, position: e.target.value as Player['position'] })}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="" className="bg-gray-900">Select position</option>
+                        <option value="Batsman" className="bg-gray-900">Batsman</option>
+                        <option value="All-rounder" className="bg-gray-900">All-rounder</option>
+                        <option value="Bowler" className="bg-gray-900">Bowler</option>
+                        <option value="Wicket-keeper" className="bg-gray-900">Wicket-keeper</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">Runs</label>
+                        <input
+                          type="number"
+                          value={editPlayer.stats?.runs || ''}
+                          onChange={(e) => setEditPlayer({ 
+                            ...editPlayer, 
+                            stats: { 
+                              ...editPlayer.stats, 
+                              runs: parseInt(e.target.value) || 0,
+                              wickets: editPlayer.stats?.wickets || 0,
+                              matches: editPlayer.stats?.matches || 0
+                            }
+                          })}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">Wickets</label>
+                        <input
+                          type="number"
+                          value={editPlayer.stats?.wickets || ''}
+                          onChange={(e) => setEditPlayer({ 
+                            ...editPlayer, 
+                            stats: { 
+                              ...editPlayer.stats, 
+                              runs: editPlayer.stats?.runs || 0,
+                              wickets: parseInt(e.target.value) || 0,
+                              matches: editPlayer.stats?.matches || 0
+                            }
+                          })}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-white/90 mb-2">Matches</label>
+                        <input
+                          type="number"
+                          value={editPlayer.stats?.matches || ''}
+                          onChange={(e) => setEditPlayer({ 
+                            ...editPlayer, 
+                            stats: { 
+                              ...editPlayer.stats, 
+                              runs: editPlayer.stats?.runs || 0,
+                              wickets: editPlayer.stats?.wickets || 0,
+                              matches: parseInt(e.target.value) || 0
+                            }
+                          })}
+                          className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-4 mt-8">
+                <button
+                  onClick={() => {
+                    setShowEditPlayerModal(false);
+                    setSelectedPlayer(null);
+                    setEditPlayer({});
+                  }}
+                  className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdatePlayer}
+                  disabled={!editPlayer.name || !editPlayer.position}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Update Player
                 </button>
               </div>
             </div>

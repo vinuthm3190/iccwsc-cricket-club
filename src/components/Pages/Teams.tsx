@@ -51,6 +51,8 @@ export default function Teams() {
   });
 
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
+  const [showEditTeamModal, setShowEditTeamModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [newTeam, setNewTeam] = useState<NewTeamData>({
     name: '',
     year: '2025',
@@ -59,9 +61,10 @@ export default function Teams() {
     overs: '16 overs',
     category: 'Adult'
   });
+  const [editTeam, setEditTeam] = useState<Partial<Team>>({});
 
   // Sample teams data with NWCL teams for all formats and categories
-  const teams: Team[] = [
+  const [teams, setTeams] = useState<Team[]>([
     // ARCL Teams
     {
       id: '1',
@@ -232,7 +235,7 @@ export default function Teams() {
       stats: { matchesPlayed: 6, wins: 2, losses: 4, draws: 0, points: 4, runRate: 0.87 },
       players: 14
     }
-  ];
+  ]);
 
   // Get available overs based on selected league
   const getAvailableOvers = (league: string) => {
@@ -253,7 +256,7 @@ export default function Teams() {
       team.overs === filters.overs &&
       team.category === filters.category
     );
-  }, [filters]);
+  }, [filters, teams]);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof TeamFilters, value: string) => {
@@ -303,8 +306,8 @@ export default function Teams() {
       players: 0
     };
 
-    console.log('Adding new team:', team);
-    alert(`Team "${team.name}" added successfully to ${team.league} ${team.overs} ${team.category} league for ${team.year} ${team.season}!`);
+    // Actually add the team to the state
+    setTeams(prev => [...prev, team]);
     
     setShowAddTeamModal(false);
     setNewTeam({
@@ -315,18 +318,51 @@ export default function Teams() {
       overs: '16 overs',
       category: 'Adult'
     });
+
+    alert(`Team "${team.name}" added successfully to ${team.league} ${team.overs} ${team.category} league for ${team.year} ${team.season}!`);
   };
 
   const handleEditTeam = (team: Team) => {
     if (!canManageTeams) return;
-    console.log('Editing team:', team);
-    alert(`Edit functionality for ${team.name} would open here.`);
+    setSelectedTeam(team);
+    setEditTeam({
+      name: team.name,
+      year: team.year,
+      season: team.season,
+      league: team.league,
+      overs: team.overs,
+      category: team.category,
+      stats: team.stats,
+      players: team.players
+    });
+    setShowEditTeamModal(true);
+  };
+
+  const handleUpdateTeam = () => {
+    if (!selectedTeam || !editTeam.name) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    // Update the team in the state
+    setTeams(prev => prev.map(team => 
+      team.id === selectedTeam.id 
+        ? { ...team, ...editTeam } as Team
+        : team
+    ));
+
+    setShowEditTeamModal(false);
+    setSelectedTeam(null);
+    setEditTeam({});
+
+    alert(`Team "${editTeam.name}" updated successfully!`);
   };
 
   const handleDeleteTeam = (teamId: string, teamName: string) => {
     if (!canManageTeams) return;
     if (confirm(`Are you sure you want to delete team "${teamName}"? This action cannot be undone.`)) {
-      console.log('Deleting team:', teamId);
+      // Actually remove the team from the state
+      setTeams(prev => prev.filter(team => team.id !== teamId));
       alert(`Team "${teamName}" deleted successfully!`);
     }
   };
@@ -719,6 +755,94 @@ export default function Teams() {
                   className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add Team
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Team Modal */}
+        {showEditTeamModal && selectedTeam && canManageTeams && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md border border-white/30">
+              <h3 className="text-2xl font-bold text-white mb-6">Edit Team: {selectedTeam.name}</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-2">Team Name *</label>
+                  <input
+                    type="text"
+                    value={editTeam.name || ''}
+                    onChange={(e) => setEditTeam({ ...editTeam, name: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    placeholder="Enter team name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-2">Players Count</label>
+                  <input
+                    type="number"
+                    value={editTeam.players || ''}
+                    onChange={(e) => setEditTeam({ ...editTeam, players: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    placeholder="Number of players"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/90 mb-2">Wins</label>
+                    <input
+                      type="number"
+                      value={editTeam.stats?.wins || ''}
+                      onChange={(e) => setEditTeam({ 
+                        ...editTeam, 
+                        stats: { 
+                          ...editTeam.stats!, 
+                          wins: parseInt(e.target.value) || 0 
+                        }
+                      })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/90 mb-2">Losses</label>
+                    <input
+                      type="number"
+                      value={editTeam.stats?.losses || ''}
+                      onChange={(e) => setEditTeam({ 
+                        ...editTeam, 
+                        stats: { 
+                          ...editTeam.stats!, 
+                          losses: parseInt(e.target.value) || 0 
+                        }
+                      })}
+                      className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-4 mt-8">
+                <button
+                  onClick={() => {
+                    setShowEditTeamModal(false);
+                    setSelectedTeam(null);
+                    setEditTeam({});
+                  }}
+                  className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateTeam}
+                  disabled={!editTeam.name}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Update Team
                 </button>
               </div>
             </div>

@@ -197,7 +197,7 @@ export default function Admin() {
       return;
     }
 
-    const user: UserAccount = {
+    const userAccount: UserAccount = {
       id: Date.now().toString(),
       username: newUser.username,
       name: newUser.name,
@@ -208,7 +208,9 @@ export default function Admin() {
       createdAt: new Date()
     };
 
-    setUserAccounts([...userAccounts, user]);
+    // Actually add the user to the state
+    setUserAccounts(prev => [...prev, userAccount]);
+    
     setShowAddUserModal(false);
     setNewUser({
       username: '',
@@ -220,8 +222,8 @@ export default function Admin() {
       confirmPassword: ''
     });
 
-    const teamInfo = user.teamName ? ` and assigned to team "${user.teamName}"` : '';
-    alert(`User "${user.name}" created successfully with ${user.role} permissions${teamInfo}!`);
+    const teamInfo = userAccount.teamName ? ` and assigned to team "${userAccount.teamName}"` : '';
+    alert(`User "${userAccount.name}" created successfully with ${userAccount.role} permissions${teamInfo}!`);
   };
 
   const handleEditUser = (user: UserAccount) => {
@@ -248,7 +250,8 @@ export default function Admin() {
       return;
     }
 
-    setUserAccounts(userAccounts.map(user => 
+    // Actually update the user in the state
+    setUserAccounts(prev => prev.map(user => 
       user.id === selectedUser.id 
         ? { ...user, ...editUser }
         : user
@@ -268,7 +271,8 @@ export default function Admin() {
     }
 
     if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-      setUserAccounts(userAccounts.filter(user => user.id !== userId));
+      // Actually remove the user from the state
+      setUserAccounts(prev => prev.filter(user => user.id !== userId));
       alert(`User "${userName}" deleted successfully.`);
     }
   };
@@ -279,7 +283,8 @@ export default function Admin() {
       return;
     }
 
-    setUserAccounts(userAccounts.map(user => 
+    // Actually toggle the user status in the state
+    setUserAccounts(prev => prev.map(user => 
       user.id === userId 
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
         : user

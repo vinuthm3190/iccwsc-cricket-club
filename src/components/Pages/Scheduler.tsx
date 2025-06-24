@@ -4,6 +4,10 @@ import { Event } from '../../types';
 
 export default function Scheduler() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [newEvent, setNewEvent] = useState<Partial<Event>>({});
+
   const [events, setEvents] = useState<Event[]>([
     {
       id: '1',
@@ -46,9 +50,6 @@ export default function Scheduler() {
       location: 'Bellevue Cricket Field'
     }
   ]);
-  const [showEventModal, setShowEventModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [newEvent, setNewEvent] = useState<Partial<Event>>({});
 
   // Available teams for selection
   const availableTeams = [
@@ -124,7 +125,9 @@ export default function Scheduler() {
   };
 
   const handleDeleteEvent = (eventId: string) => {
-    setEvents(events.filter(e => e.id !== eventId));
+    // Actually remove the event from the state
+    setEvents(prev => prev.filter(e => e.id !== eventId));
+    alert('Event deleted successfully!');
   };
 
   const handleSaveEvent = () => {
@@ -135,7 +138,12 @@ export default function Scheduler() {
 
     if (selectedEvent) {
       // Edit existing event
-      setEvents(events.map(e => e.id === selectedEvent.id ? { ...newEvent, id: selectedEvent.id } as Event : e));
+      setEvents(prev => prev.map(e => 
+        e.id === selectedEvent.id 
+          ? { ...newEvent, id: selectedEvent.id } as Event 
+          : e
+      ));
+      alert('Event updated successfully!');
     } else {
       // Add new event
       const event: Event = {
@@ -144,7 +152,8 @@ export default function Scheduler() {
         teams: newEvent.teams || [],
         location: newEvent.location || ''
       } as Event;
-      setEvents([...events, event]);
+      setEvents(prev => [...prev, event]);
+      alert('Event created successfully!');
     }
 
     setShowEventModal(false);
