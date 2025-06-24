@@ -85,7 +85,7 @@ class DataService {
         }
       ],
       players: [
-        // Cereal Killers players
+        // Cereal Killers players - ONLY these 14 players
         {
           id: '1',
           name: 'Naim Mohammad',
@@ -226,169 +226,86 @@ class DataService {
           category: 'Adult',
           teamName: 'Cereal Killers'
         },
-        // Additional players from other teams
         {
           id: '11',
-          name: 'Rajesh Kumar',
-          position: 'Batsman',
-          email: 'rajesh.kumar@email.com',
-          phone: '+1-206-555-0115',
-          stats: { runs: 892, wickets: 1, matches: 22 },
+          name: 'Arun Thippur Jayakeerthy',
+          position: 'Bowler',
+          email: 'arun.jayakeerthy@email.com',
+          phone: '+1-206-555-0111',
+          stats: { runs: 89, wickets: 32, matches: 22 },
           year: '2025',
-          season: 'summer',
+          season: 'spring',
           league: 'ARCL',
           overs: '16 overs',
           category: 'Adult',
-          teamName: 'Angry Bulls'
+          teamName: 'Cereal Killers'
         },
         {
           id: '12',
-          name: 'Priya Sharma',
+          name: 'Avinash Talanki',
           position: 'All-rounder',
-          email: 'priya.sharma@email.com',
-          phone: '+1-206-555-0116',
-          stats: { runs: 89, wickets: 29, matches: 27 },
+          email: 'avinash.talanki@email.com',
+          phone: '+1-206-555-0112',
+          stats: { runs: 623, wickets: 21, matches: 26 },
           year: '2025',
-          season: 'summer',
+          season: 'spring',
           league: 'ARCL',
           overs: '16 overs',
           category: 'Adult',
-          teamName: 'Royal Warriors'
+          teamName: 'Cereal Killers'
         },
         {
           id: '13',
-          name: 'Vikram Singh',
-          position: 'Bowler',
-          email: 'vikram.singh@email.com',
-          phone: '+1-206-555-0117',
-          stats: { runs: 78, wickets: 32, matches: 20 },
+          name: 'Dhanush Shetty CK',
+          position: 'Batsman',
+          email: 'dhanush.shetty@email.com',
+          phone: '+1-206-555-0113',
+          stats: { runs: 892, wickets: 4, matches: 23 },
           year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T20',
+          season: 'spring',
+          league: 'ARCL',
+          overs: '16 overs',
           category: 'Adult',
-          teamName: 'Watermelons'
+          teamName: 'Cereal Killers'
         },
         {
           id: '14',
-          name: 'Anita Patel',
+          name: 'Siva Krapa',
           position: 'Wicket-keeper',
-          email: 'anita.patel@email.com',
-          phone: '+1-206-555-0118',
-          stats: { runs: 734, wickets: 18, matches: 27 },
+          email: 'siva.krapa@email.com',
+          phone: '+1-206-555-0114',
+          stats: { runs: 456, wickets: 2, matches: 21 },
           year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T20',
+          season: 'spring',
+          league: 'ARCL',
+          overs: '16 overs',
           category: 'Adult',
-          teamName: 'Solaris'
-        },
-        {
-          id: '15',
-          name: 'Meera Gupta',
-          position: 'All-rounder',
-          email: 'meera.gupta@email.com',
-          phone: '+1-206-555-0120',
-          stats: { runs: 567, wickets: 12, matches: 24 },
-          year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T10',
-          category: 'Youth',
-          teamName: 'Watermelons'
+          teamName: 'Cereal Killers'
         }
       ],
       teams: [
-        // ARCL Teams
+        // Only Cereal Killers team for now
         {
           id: '1',
-          name: 'Angry Bulls',
+          name: 'Cereal Killers',
           year: '2025',
-          season: 'summer',
+          season: 'spring',
           league: 'ARCL',
           overs: '16 overs',
           category: 'Adult',
           stats: { matchesPlayed: 12, wins: 8, losses: 3, draws: 1, points: 17, runRate: 1.25 },
-          players: 15
-        },
-        {
-          id: '2',
-          name: 'Royal Warriors',
-          year: '2025',
-          season: 'summer',
-          league: 'ARCL',
-          overs: '16 overs',
-          category: 'Adult',
-          stats: { matchesPlayed: 12, wins: 7, losses: 4, draws: 1, points: 15, runRate: 0.98 },
           players: 14
-        },
-        {
-          id: '3',
-          name: 'Cereal Killers',
-          year: '2025',
-          season: 'summer',
-          league: 'ARCL',
-          overs: '16 overs',
-          category: 'Adult',
-          stats: { matchesPlayed: 12, wins: 6, losses: 5, draws: 1, points: 13, runRate: 0.76 },
-          players: 16
-        },
-        // NWCL Teams - Watermelons
-        {
-          id: '4',
-          name: 'Watermelons',
-          year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T10',
-          category: 'Adult',
-          stats: { matchesPlayed: 8, wins: 6, losses: 2, draws: 0, points: 12, runRate: 1.67 },
-          players: 11
-        },
-        {
-          id: '5',
-          name: 'Watermelons',
-          year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T20',
-          category: 'Adult',
-          stats: { matchesPlayed: 10, wins: 7, losses: 3, draws: 0, points: 14, runRate: 1.45 },
-          players: 13
-        },
-        // NWCL Teams - Solaris
-        {
-          id: '6',
-          name: 'Solaris',
-          year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T10',
-          category: 'Adult',
-          stats: { matchesPlayed: 8, wins: 5, losses: 3, draws: 0, points: 10, runRate: 1.34 },
-          players: 12
-        },
-        {
-          id: '7',
-          name: 'Solaris',
-          year: '2025',
-          season: 'summer',
-          league: 'NWCL',
-          overs: 'T20',
-          category: 'Adult',
-          stats: { matchesPlayed: 10, wins: 5, losses: 5, draws: 0, points: 10, runRate: 0.89 },
-          players: 12
         }
       ],
       events: [
         {
           id: '1',
-          title: 'Cricket Practice',
+          title: 'Cereal Killers Practice Session',
           type: 'practice',
           date: new Date(2024, 11, 15).toISOString(),
           time: '18:00',
-          description: 'Regular cricket practice session - batting and bowling drills',
-          teams: ['Angry Bulls'],
+          description: 'Regular cricket practice session - batting and bowling drills for Cereal Killers team',
+          teams: ['Cereal Killers'],
           location: 'Marymoor Park Cricket Ground'
         },
         {
@@ -398,23 +315,33 @@ class DataService {
           date: new Date(2024, 11, 18).toISOString(),
           time: '19:30',
           description: 'Discuss tactics for upcoming tournament matches',
-          teams: ['Watermelons', 'Solaris'],
+          teams: ['Cereal Killers'],
           location: 'Community Center Conference Room'
+        },
+        {
+          id: '3',
+          title: 'League Match vs Seattle Strikers',
+          type: 'match',
+          date: new Date(2024, 11, 22).toISOString(),
+          time: '15:00',
+          description: 'ARCL 16-over league match at Marymoor Park Cricket Ground',
+          teams: ['Cereal Killers'],
+          location: 'Marymoor Park Cricket Ground'
         }
       ],
       blogPosts: [
         {
           id: '1',
-          title: 'ICCWSC Dominates Summer League with Spectacular Victory',
-          content: `What a match it was! Our Angry Bulls team showcased exceptional cricket skills in yesterday's match against the Seattle Strikers. The team's performance was nothing short of spectacular, with outstanding contributions from both batsmen and bowlers.
+          title: 'Cereal Killers Dominate Spring League with Spectacular Victory',
+          content: `What a match it was! Our Cereal Killers team showcased exceptional cricket skills in yesterday's match against the Seattle Strikers. The team's performance was nothing short of spectacular, with outstanding contributions from both batsmen and bowlers.
 
 **Match Highlights:**
 
-The match began with our captain winning the toss and choosing to bat first. Our opening pair got off to a flying start, putting up 50 runs in the first 6 overs. Rajesh Kumar played a magnificent innings, scoring 78 runs off just 45 balls, including 6 boundaries and 3 sixes.
+The match began with our captain winning the toss and choosing to bat first. Our opening pair got off to a flying start, putting up 50 runs in the first 6 overs. Naim Mohammad played a magnificent innings, scoring 78 runs off just 45 balls, including 6 boundaries and 3 sixes.
 
 **Bowling Excellence:**
 
-Our bowling attack was equally impressive. Vikram Singh's spell of 4 wickets for 25 runs in his 4 overs was the highlight of our bowling performance. The team's fielding was sharp, with two brilliant run-outs that changed the momentum of the game.
+Our bowling attack was equally impressive. Vinuth Muniraju's spell of 4 wickets for 25 runs in his 4 overs was the highlight of our bowling performance. The team's fielding was sharp, with two brilliant run-outs that changed the momentum of the game.
 
 **Team Spirit:**
 
@@ -425,19 +352,59 @@ What made this victory even more special was the team spirit displayed throughou
 With this victory, we move to the top of the league table. Our next match is against the Redmond Royals next weekend. The team is confident and ready to continue this winning streak.
 
 Come and support your team! Let's fill the stands with orange and green!`,
-          excerpt: 'Our Angry Bulls team delivered a spectacular performance against Seattle Strikers, showcasing the true spirit of ICCWSC cricket with outstanding batting, bowling, and fielding.',
+          excerpt: 'Our Cereal Killers team delivered a spectacular performance against Seattle Strikers, showcasing the true spirit of ICCWSC cricket with outstanding batting, bowling, and fielding.',
           author: {
-            name: 'Rajesh Kumar',
-            username: 'rajesh.kumar',
+            name: 'Naim Mohammad',
+            username: 'naim.mohammad',
             role: 'captain'
           },
           category: 'match-report',
-          tags: ['victory', 'summer-league', 'angry-bulls', 'team-performance'],
+          tags: ['victory', 'spring-league', 'cereal-killers', 'team-performance'],
           publishedAt: new Date('2024-12-20T10:30:00').toISOString(),
           isPublished: true,
           likes: 24,
           comments: [],
           readTime: 3
+        },
+        {
+          id: '2',
+          title: 'Player Spotlight: Darshan Masti Prakash - The All-Rounder Excellence',
+          content: `This month, we're excited to spotlight one of our most versatile cricketers - Darshan Masti Prakash. As an all-rounder for the Cereal Killers, Darshan has consistently delivered outstanding performances with both bat and ball.
+
+**Cricket Journey:**
+
+Darshan brings years of cricket experience from India, where he honed his skills playing in local leagues. "Cricket has always been my passion," says Darshan. "Joining ICCWSC and the Cereal Killers has given me the opportunity to continue playing the sport I love while building new friendships."
+
+**Outstanding Performance:**
+
+In this season alone, Darshan has scored 890 runs and taken 23 wickets across 30 matches. His all-rounder capabilities make him an invaluable asset to the Cereal Killers team. His recent performance in the ARCL 16-over league has been particularly impressive.
+
+**Training and Dedication:**
+
+"Darshan is always working on improving his game," says his teammate Vinuth Muniraju. "His dedication to both batting and bowling is inspiring. He practices regularly and is always willing to help younger players."
+
+**Future Goals:**
+
+When asked about his cricket aspirations, Darshan says, "I want to help the Cereal Killers win the championship and continue contributing to ICCWSC's success. Cricket teaches you discipline and teamwork, values that extend beyond the field."
+
+**Team Contribution:**
+
+Beyond his on-field performance, Darshan is known for his leadership qualities and positive attitude. He often mentors new players and helps maintain team morale during challenging matches.
+
+We're proud to have Darshan as part of the Cereal Killers and look forward to his continued excellence on the cricket field.`,
+          excerpt: 'Meet Darshan Masti Prakash, our versatile all-rounder who has scored 890 runs and taken 23 wickets this season while inspiring teammates with his dedication.',
+          author: {
+            name: 'Uday C',
+            username: 'uday.c',
+            role: 'member'
+          },
+          category: 'player-spotlight',
+          tags: ['player-spotlight', 'all-rounder', 'cereal-killers', 'inspiration'],
+          publishedAt: new Date('2024-12-18T14:20:00').toISOString(),
+          isPublished: true,
+          likes: 31,
+          comments: [],
+          readTime: 4
         }
       ]
     };

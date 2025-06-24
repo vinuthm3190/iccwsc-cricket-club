@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Save, RotateCcw, Users, Target, Filter, User } from 'lucide-react';
 import { Player, TeamConfig } from '../../types';
+import { useDataService } from '../../hooks/useDataService';
 
 interface ExtendedPlayer extends Player {
   year: string;
@@ -12,165 +13,12 @@ interface ExtendedPlayer extends Player {
 }
 
 export default function TeamPicker() {
-  // Extended players data with team assignments (images removed)
-  const availablePlayers: ExtendedPlayer[] = [
-    {
-      id: '1',
-      name: 'Rajesh Kumar',
-      position: 'Batsman',
-      stats: { runs: 1250, wickets: 5, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Angry Bulls'
-    },
-    {
-      id: '2',
-      name: 'Priya Sharma',
-      position: 'All-rounder',
-      stats: { runs: 890, wickets: 23, matches: 30 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Royal Warriors'
-    },
-    {
-      id: '3',
-      name: 'Vikram Singh',
-      position: 'Bowler',
-      stats: { runs: 245, wickets: 45, matches: 29 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Adult',
-      teamName: 'Watermelons'
-    },
-    {
-      id: '4',
-      name: 'Anita Patel',
-      position: 'Wicket-keeper',
-      stats: { runs: 678, wickets: 0, matches: 28 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Adult',
-      teamName: 'Solaris'
-    },
-    {
-      id: '5',
-      name: 'Arjun Reddy',
-      position: 'Batsman',
-      stats: { runs: 1456, wickets: 2, matches: 25 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Cereal Killers'
-    },
-    {
-      id: '6',
-      name: 'Meera Gupta',
-      position: 'All-rounder',
-      stats: { runs: 734, wickets: 18, matches: 27 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Youth',
-      teamName: 'Watermelons'
-    },
-    {
-      id: '7',
-      name: 'Suresh Nair',
-      position: 'Bowler',
-      stats: { runs: 156, wickets: 38, matches: 30 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T40',
-      category: 'Adult',
-      teamName: 'Solaris'
-    },
-    {
-      id: '8',
-      name: 'Kavya Iyer',
-      position: 'Batsman',
-      stats: { runs: 1123, wickets: 3, matches: 26 },
-      year: '2024',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Angry Bulls'
-    },
-    {
-      id: '9',
-      name: 'Rohit Sharma',
-      position: 'All-rounder',
-      stats: { runs: 567, wickets: 12, matches: 24 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Youth',
-      teamName: 'Watermelons'
-    },
-    {
-      id: '10',
-      name: 'Deepika Singh',
-      position: 'Bowler',
-      stats: { runs: 89, wickets: 29, matches: 27 },
-      year: '2025',
-      season: 'summer',
-      league: 'ARCL',
-      overs: '16 overs',
-      category: 'Adult',
-      teamName: 'Royal Warriors'
-    },
-    {
-      id: '11',
-      name: 'Amit Patel',
-      position: 'Batsman',
-      stats: { runs: 892, wickets: 1, matches: 22 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T10',
-      category: 'Adult',
-      teamName: 'Solaris'
-    },
-    {
-      id: '12',
-      name: 'Sneha Reddy',
-      position: 'All-rounder',
-      stats: { runs: 445, wickets: 15, matches: 18 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T20',
-      category: 'Youth',
-      teamName: 'Solaris'
-    },
-    {
-      id: '13',
-      name: 'Kiran Kumar',
-      position: 'Bowler',
-      stats: { runs: 78, wickets: 32, matches: 20 },
-      year: '2025',
-      season: 'summer',
-      league: 'NWCL',
-      overs: 'T40',
-      category: 'Youth',
-      teamName: 'Watermelons'
-    }
-  ];
+  // Use the centralized data service for players
+  const {
+    data: availablePlayers,
+    loading,
+    error
+  } = useDataService<ExtendedPlayer>('players');
 
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('');
@@ -298,6 +146,33 @@ export default function TeamPicker() {
     console.log('Saving cricket team configuration:', config);
     alert(`Cricket team configuration saved successfully with ${selectedPlayers.length} players!`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-white text-xl">Loading players...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-xl mb-4">Error loading players: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const maxPlayers = getMaxPlayers();
   const teamFormatName = getTeamFormatName();

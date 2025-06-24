@@ -53,7 +53,7 @@ export default function Players() {
   const { hasPermission } = useAuth();
   const canManagePlayers = hasPermission(['captain', 'vice', 'admin']);
   
-  // Use the data service hook
+  // Use the centralized data service
   const {
     data: players,
     loading,
@@ -70,7 +70,7 @@ export default function Players() {
     league: '',
     position: '',
     year: '2025',
-    season: 'summer',
+    season: 'spring',
     category: 'Adult'
   });
 
@@ -85,11 +85,11 @@ export default function Players() {
     email: '',
     phone: '',
     year: '2025',
-    season: 'summer',
+    season: 'spring',
     league: 'ARCL',
     overs: '16 overs',
     category: 'Adult',
-    teamName: '',
+    teamName: 'Cereal Killers',
     stats: { runs: 0, wickets: 0, matches: 0 }
   });
 
@@ -204,7 +204,7 @@ export default function Players() {
         email: newPlayer.email || '',
         phone: newPlayer.phone || '',
         year: newPlayer.year || '2025',
-        season: newPlayer.season || 'summer',
+        season: newPlayer.season || 'spring',
         league: newPlayer.league || 'ARCL',
         overs: newPlayer.overs || '16 overs',
         category: newPlayer.category || 'Adult',
@@ -221,11 +221,11 @@ export default function Players() {
         email: '',
         phone: '',
         year: '2025',
-        season: 'summer',
+        season: 'spring',
         league: 'ARCL',
         overs: '16 overs',
         category: 'Adult',
-        teamName: '',
+        teamName: 'Cereal Killers',
         stats: { runs: 0, wickets: 0, matches: 0 }
       });
 
@@ -260,11 +260,11 @@ export default function Players() {
         email: '',
         phone: '',
         year: '2025',
-        season: 'summer',
+        season: 'spring',
         league: 'ARCL',
         overs: '16 overs',
         category: 'Adult',
-        teamName: '',
+        teamName: 'Cereal Killers',
         stats: { runs: 0, wickets: 0, matches: 0 }
       });
 
@@ -304,11 +304,11 @@ export default function Players() {
         email: '',
         phone: '',
         year: '2025',
-        season: 'summer',
+        season: 'spring',
         league: 'ARCL',
         overs: '16 overs',
         category: 'Adult',
-        teamName: '',
+        teamName: 'Cereal Killers',
         stats: { runs: 0, wickets: 0, matches: 0 }
       });
 
@@ -511,8 +511,8 @@ export default function Players() {
                 onChange={(e) => setFilters({ ...filters, season: e.target.value })}
                 className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
               >
-                <option value="summer" className="bg-gray-900">Summer</option>
                 <option value="spring" className="bg-gray-900">Spring</option>
+                <option value="summer" className="bg-gray-900">Summer</option>
               </select>
             </div>
 
@@ -567,7 +567,7 @@ export default function Players() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredPlayers.map((player) => (
                 <div
                   key={player.id}
@@ -1009,11 +1009,11 @@ export default function Players() {
                       email: '',
                       phone: '',
                       year: '2025',
-                      season: 'summer',
+                      season: 'spring',
                       league: 'ARCL',
                       overs: '16 overs',
                       category: 'Adult',
-                      teamName: '',
+                      teamName: 'Cereal Killers',
                       stats: { runs: 0, wickets: 0, matches: 0 }
                     });
                   }}
@@ -1074,11 +1074,11 @@ export default function Players() {
                       email: '',
                       phone: '',
                       year: '2025',
-                      season: 'summer',
+                      season: 'spring',
                       league: 'ARCL',
                       overs: '16 overs',
                       category: 'Adult',
-                      teamName: '',
+                      teamName: 'Cereal Killers',
                       stats: { runs: 0, wickets: 0, matches: 0 }
                     });
                   }}
