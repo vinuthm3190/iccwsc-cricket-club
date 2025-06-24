@@ -20,6 +20,8 @@ export interface Player {
   name: string;
   position: 'Batsman' | 'All-rounder' | 'Bowler' | 'Wicket-keeper';
   avatar?: string;
+  email?: string;
+  phone?: string;
   stats?: {
     runs: number;
     wickets: number;
@@ -34,4 +36,48 @@ export interface TeamConfig {
   players: Player[];
   createdBy: string;
   createdAt: Date;
+}
+
+export interface NotificationTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  emailContent: string;
+  smsContent: string;
+  type: 'match' | 'practice' | 'meeting' | 'general';
+  variables: string[];
+}
+
+export interface NotificationSettings {
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  emailProvider: 'emailjs' | 'sendgrid' | 'mailgun';
+  smsProvider: 'twilio' | 'nexmo';
+  templates: NotificationTemplate[];
+}
+
+export interface NotificationRecipient {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  teams: string[];
+  preferences: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    matchReminders: boolean;
+    practiceReminders: boolean;
+    generalUpdates: boolean;
+  };
+}
+
+export interface NotificationLog {
+  id: string;
+  type: 'email' | 'sms';
+  recipient: string;
+  subject: string;
+  content: string;
+  status: 'sent' | 'failed' | 'pending';
+  sentAt: Date;
+  eventId?: string;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Users, UserPlus, Edit3, Trash2, Save, X, CheckCircle, AlertTriangle, Crown, Star, User, Trophy } from 'lucide-react';
+import { Shield, Users, UserPlus, Edit3, Trash2, Save, X, CheckCircle, AlertTriangle, Crown, Star, User, Trophy, Search, Filter } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface UserAccount {
@@ -14,14 +14,25 @@ interface UserAccount {
   lastLogin?: Date;
 }
 
-interface NewUserData {
-  username: string;
+interface ExistingPlayer {
+  id: string;
   name: string;
-  email: string;
-  role: 'member' | 'vice' | 'captain';
-  teamName?: string;
-  password: string;
-  confirmPassword: string;
+  teamName: string;
+  league: string;
+  overs: string;
+  category: string;
+  year: string;
+  season: string;
+  position: string;
+  email?: string;
+  phone?: string;
+}
+
+interface PlayerFilters {
+  search: string;
+  teamName: string;
+  league: string;
+  category: string;
 }
 
 export default function Admin() {
@@ -51,24 +62,290 @@ export default function Admin() {
     { name: 'Solaris Youth T40', league: 'NWCL', format: 'T40', category: 'Youth' }
   ];
 
+  // Existing players from the cricket database
+  const existingPlayers: ExistingPlayer[] = [
+    // Cereal Killers players
+    {
+      id: '1',
+      name: 'Naim Mohammad',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Batsman',
+      email: 'naim.mohammad@email.com',
+      phone: '+1-206-555-0101'
+    },
+    {
+      id: '2',
+      name: 'Dhruva Kumar',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Batsman',
+      email: 'dhruva.kumar@email.com',
+      phone: '+1-206-555-0102'
+    },
+    {
+      id: '3',
+      name: 'Darshan Masti Prakash',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'All-rounder',
+      email: 'darshan.prakash@email.com',
+      phone: '+1-206-555-0103'
+    },
+    {
+      id: '4',
+      name: 'Vinuth Muniraju',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Bowler',
+      email: 'vinuth.muniraju@email.com',
+      phone: '+1-206-555-0104'
+    },
+    {
+      id: '5',
+      name: 'Uday C',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Batsman',
+      email: 'uday.c@email.com',
+      phone: '+1-206-555-0105'
+    },
+    {
+      id: '6',
+      name: 'Vidhyadhar Ghorpade',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'All-rounder',
+      email: 'vidhyadhar.ghorpade@email.com',
+      phone: '+1-206-555-0106'
+    },
+    {
+      id: '7',
+      name: 'Vijeth Shetty',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Bowler',
+      email: 'vijeth.shetty@email.com',
+      phone: '+1-206-555-0107'
+    },
+    {
+      id: '8',
+      name: 'Kiran S',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Batsman',
+      email: 'kiran.s@email.com',
+      phone: '+1-206-555-0108'
+    },
+    {
+      id: '9',
+      name: 'Manjunatha Shetty Kondalli',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Wicket-keeper',
+      email: 'manjunatha.kondalli@email.com',
+      phone: '+1-206-555-0109'
+    },
+    {
+      id: '10',
+      name: 'Raj Mani N',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'All-rounder',
+      email: 'raj.mani@email.com',
+      phone: '+1-206-555-0110'
+    },
+    {
+      id: '11',
+      name: 'Arun Thippur Jayakeerthy',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Bowler',
+      email: 'arun.jayakeerthy@email.com',
+      phone: '+1-206-555-0111'
+    },
+    {
+      id: '12',
+      name: 'Avinash Talanki',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Batsman',
+      email: 'avinash.talanki@email.com',
+      phone: '+1-206-555-0112'
+    },
+    {
+      id: '13',
+      name: 'Dhanush Shetty CK',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'All-rounder',
+      email: 'dhanush.shetty@email.com',
+      phone: '+1-206-555-0113'
+    },
+    {
+      id: '14',
+      name: 'Siva Krapa',
+      teamName: 'Cereal Killers',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'spring',
+      position: 'Bowler',
+      email: 'siva.krapa@email.com',
+      phone: '+1-206-555-0114'
+    },
+    // Additional players from other teams
+    {
+      id: '15',
+      name: 'Rajesh Kumar',
+      teamName: 'Angry Bulls',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'summer',
+      position: 'Batsman',
+      email: 'rajesh.kumar@email.com',
+      phone: '+1-206-555-0115'
+    },
+    {
+      id: '16',
+      name: 'Priya Sharma',
+      teamName: 'Royal Warriors',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'summer',
+      position: 'All-rounder',
+      email: 'priya.sharma@email.com',
+      phone: '+1-206-555-0116'
+    },
+    {
+      id: '17',
+      name: 'Vikram Singh',
+      teamName: 'Watermelons',
+      league: 'NWCL',
+      overs: 'T20',
+      category: 'Adult',
+      year: '2025',
+      season: 'summer',
+      position: 'Bowler',
+      email: 'vikram.singh@email.com',
+      phone: '+1-206-555-0117'
+    },
+    {
+      id: '18',
+      name: 'Anita Patel',
+      teamName: 'Solaris',
+      league: 'NWCL',
+      overs: 'T20',
+      category: 'Adult',
+      year: '2025',
+      season: 'summer',
+      position: 'Wicket-keeper',
+      email: 'anita.patel@email.com',
+      phone: '+1-206-555-0118'
+    },
+    {
+      id: '19',
+      name: 'Arjun Reddy',
+      teamName: 'Angry Bulls',
+      league: 'ARCL',
+      overs: '16 overs',
+      category: 'Adult',
+      year: '2025',
+      season: 'summer',
+      position: 'Batsman',
+      email: 'arjun.reddy@email.com',
+      phone: '+1-206-555-0119'
+    },
+    {
+      id: '20',
+      name: 'Meera Gupta',
+      teamName: 'Watermelons',
+      league: 'NWCL',
+      overs: 'T10',
+      category: 'Youth',
+      year: '2025',
+      season: 'summer',
+      position: 'All-rounder',
+      email: 'meera.gupta@email.com',
+      phone: '+1-206-555-0120'
+    }
+  ];
+
   // Sample user accounts data with team assignments
   const [userAccounts, setUserAccounts] = useState<UserAccount[]>([
     {
       id: '1',
-      username: 'captain',
-      name: 'Alex Johnson',
-      email: 'alex.johnson@iccwsc.com',
+      username: 'naim.mohammad',
+      name: 'Naim Mohammad',
+      email: 'naim.mohammad@email.com',
       role: 'captain',
       status: 'active',
-      teamName: 'Angry Bulls',
+      teamName: 'Cereal Killers',
       createdAt: new Date('2024-01-15'),
       lastLogin: new Date('2024-12-20')
     },
     {
       id: '2',
-      username: 'vice',
-      name: 'Sarah Martinez',
-      email: 'sarah.martinez@iccwsc.com',
+      username: 'priya.sharma',
+      name: 'Priya Sharma',
+      email: 'priya.sharma@email.com',
       role: 'vice',
       status: 'active',
       teamName: 'Royal Warriors',
@@ -77,65 +354,32 @@ export default function Admin() {
     },
     {
       id: '3',
-      username: 'member',
-      name: 'Mike Thompson',
-      email: 'mike.thompson@iccwsc.com',
-      role: 'member',
-      status: 'active',
-      teamName: 'Watermelons Adult T20',
-      createdAt: new Date('2024-03-05'),
-      lastLogin: new Date('2024-12-18')
-    },
-    {
-      id: '4',
-      username: 'rajesh.kumar',
-      name: 'Rajesh Kumar',
-      email: 'rajesh.kumar@iccwsc.com',
-      role: 'member',
-      status: 'active',
-      teamName: 'Angry Bulls',
-      createdAt: new Date('2024-04-12'),
-      lastLogin: new Date('2024-12-17')
-    },
-    {
-      id: '5',
-      username: 'priya.sharma',
-      name: 'Priya Sharma',
-      email: 'priya.sharma@iccwsc.com',
-      role: 'vice',
-      status: 'active',
-      teamName: 'Solaris Adult T20',
-      createdAt: new Date('2024-05-20'),
-      lastLogin: new Date('2024-12-16')
-    },
-    {
-      id: '6',
       username: 'vikram.singh',
       name: 'Vikram Singh',
-      email: 'vikram.singh@iccwsc.com',
+      email: 'vikram.singh@email.com',
       role: 'member',
-      status: 'inactive',
-      teamName: 'Cereal Killers',
-      createdAt: new Date('2024-06-08'),
-      lastLogin: new Date('2024-11-15')
+      status: 'active',
+      teamName: 'Watermelons',
+      createdAt: new Date('2024-03-05'),
+      lastLogin: new Date('2024-12-18')
     }
   ]);
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
-  const [newUser, setNewUser] = useState<NewUserData>({
-    username: '',
-    name: '',
-    email: '',
-    role: 'member',
-    teamName: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [selectedPlayer, setSelectedPlayer] = useState<ExistingPlayer | null>(null);
   const [editUser, setEditUser] = useState<Partial<UserAccount>>({});
   const [filterRole, setFilterRole] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
+
+  // Player filters for the selection modal
+  const [playerFilters, setPlayerFilters] = useState<PlayerFilters>({
+    search: '',
+    teamName: '',
+    league: '',
+    category: ''
+  });
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -164,47 +408,71 @@ export default function Admin() {
     return availableTeams.find(team => team.name === teamName);
   };
 
+  // Filter existing players based on search and filters
+  const filteredPlayers = existingPlayers.filter(player => {
+    const matchesSearch = !playerFilters.search || 
+      player.name.toLowerCase().includes(playerFilters.search.toLowerCase()) ||
+      player.teamName.toLowerCase().includes(playerFilters.search.toLowerCase());
+    
+    const matchesTeam = !playerFilters.teamName || player.teamName === playerFilters.teamName;
+    const matchesLeague = !playerFilters.league || player.league === playerFilters.league;
+    const matchesCategory = !playerFilters.category || player.category === playerFilters.category;
+
+    return matchesSearch && matchesTeam && matchesLeague && matchesCategory;
+  });
+
+  // Get unique values for filter dropdowns
+  const getUniqueTeamNames = () => {
+    return [...new Set(existingPlayers.map(player => player.teamName))].sort();
+  };
+
+  const getUniqueLeagues = () => {
+    return [...new Set(existingPlayers.map(player => player.league))].sort();
+  };
+
+  const getUniqueCategories = () => {
+    return [...new Set(existingPlayers.map(player => player.category))].sort();
+  };
+
   const filteredUsers = userAccounts.filter(user => {
     const matchesRole = !filterRole || user.role === filterRole;
     const matchesStatus = !filterStatus || user.status === filterStatus;
     return matchesRole && matchesStatus;
   });
 
-  const handleAddUser = () => {
-    if (!newUser.username || !newUser.name || !newUser.email || !newUser.password) {
-      alert('Please fill in all required fields.');
+  const handlePlayerSelect = (player: ExistingPlayer) => {
+    setSelectedPlayer(player);
+  };
+
+  const handleCreateUserFromPlayer = (role: 'member' | 'vice' | 'captain') => {
+    if (!selectedPlayer) {
+      alert('Please select a player first.');
       return;
     }
 
-    if (newUser.password !== newUser.confirmPassword) {
-      alert('Passwords do not match.');
+    // Check if user already exists
+    if (userAccounts.some(user => user.name === selectedPlayer.name)) {
+      alert('A user account already exists for this player.');
       return;
     }
 
-    if (userAccounts.some(user => user.username === newUser.username)) {
-      alert('Username already exists. Please choose a different username.');
-      return;
-    }
+    // Generate username from name
+    const username = selectedPlayer.name.toLowerCase().replace(/\s+/g, '.');
 
-    if (userAccounts.some(user => user.email === newUser.email)) {
-      alert('Email already exists. Please use a different email address.');
-      return;
-    }
-
-    // Validate team assignment for captains and vice captains
-    if ((newUser.role === 'captain' || newUser.role === 'vice') && !newUser.teamName) {
-      alert(`Please assign a team for the ${newUser.role === 'vice' ? 'vice captain' : 'captain'}.`);
+    // Check if username already exists
+    if (userAccounts.some(user => user.username === username)) {
+      alert('Username already exists. Please create manually with a different username.');
       return;
     }
 
     const userAccount: UserAccount = {
       id: Date.now().toString(),
-      username: newUser.username,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
+      username: username,
+      name: selectedPlayer.name,
+      email: selectedPlayer.email || `${username}@email.com`,
+      role: role,
       status: 'active',
-      teamName: newUser.teamName || undefined,
+      teamName: selectedPlayer.teamName,
       createdAt: new Date()
     };
 
@@ -212,18 +480,15 @@ export default function Admin() {
     setUserAccounts(prev => [...prev, userAccount]);
     
     setShowAddUserModal(false);
-    setNewUser({
-      username: '',
-      name: '',
-      email: '',
-      role: 'member',
+    setSelectedPlayer(null);
+    setPlayerFilters({
+      search: '',
       teamName: '',
-      password: '',
-      confirmPassword: ''
+      league: '',
+      category: ''
     });
 
-    const teamInfo = userAccount.teamName ? ` and assigned to team "${userAccount.teamName}"` : '';
-    alert(`User "${userAccount.name}" created successfully with ${userAccount.role} permissions${teamInfo}!`);
+    alert(`User account created for "${userAccount.name}" with ${role} permissions and assigned to team "${userAccount.teamName}"!`);
   };
 
   const handleEditUser = (user: UserAccount) => {
@@ -351,7 +616,7 @@ export default function Admin() {
                 <Shield size={32} />
                 <span>User Management</span>
               </h2>
-              <p className="text-white/70">Manage user accounts, permissions, and team assignments</p>
+              <p className="text-white/70">Create user accounts from existing cricket players and manage permissions</p>
             </div>
             
             <button
@@ -359,7 +624,7 @@ export default function Admin() {
               className="bg-gradient-to-r from-orange-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-green-700 transition-all transform hover:scale-105 flex items-center space-x-2 mt-4 md:mt-0"
             >
               <UserPlus size={20} />
-              <span>Add New User</span>
+              <span>Create User from Player</span>
             </button>
           </div>
 
@@ -515,189 +780,206 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Add User Modal */}
+        {/* Create User from Player Modal */}
         {showAddUserModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-2xl border border-white/30 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-2xl font-bold text-white mb-6">Add New User</h3>
+            <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 w-full max-w-6xl border border-white/30 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-2xl font-bold text-white mb-6">Create User Account from Cricket Player</h3>
               
-              <div className="space-y-6">
-                {/* Basic User Information */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Player Selection */}
                 <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
                   <h4 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <User size={20} />
-                    <span>User Information</span>
+                    <Users size={20} />
+                    <span>Select Cricket Player</span>
                   </h4>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Full Name *</label>
+                  {/* Player Filters */}
+                  <div className="space-y-4 mb-6">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={16} />
                       <input
                         type="text"
-                        value={newUser.name}
-                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter full name"
+                        value={playerFilters.search}
+                        onChange={(e) => setPlayerFilters({ ...playerFilters, search: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        placeholder="Search players by name or team..."
                       />
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Username *</label>
-                      <input
-                        type="text"
-                        value={newUser.username}
-                        onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter username"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-white/90 mb-2">Email *</label>
-                      <input
-                        type="email"
-                        value={newUser.email}
-                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter email address"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Role and Team Assignment */}
-                <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <Trophy size={20} />
-                    <span>Role & Team Assignment</span>
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Role *</label>
+                    
+                    <div className="grid grid-cols-3 gap-2">
                       <select
-                        value={newUser.role}
-                        onChange={(e) => setNewUser({ ...newUser, role: e.target.value as NewUserData['role'], teamName: '' })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        value={playerFilters.teamName}
+                        onChange={(e) => setPlayerFilters({ ...playerFilters, teamName: e.target.value })}
+                        className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
                       >
-                        <option value="member" className="bg-gray-900">Member</option>
-                        <option value="vice" className="bg-gray-900">Vice Captain</option>
-                        <option value="captain" className="bg-gray-900">Captain</option>
+                        <option value="" className="bg-gray-900">All Teams</option>
+                        {getUniqueTeamNames().map(team => (
+                          <option key={team} value={team} className="bg-gray-900">{team}</option>
+                        ))}
+                      </select>
+                      
+                      <select
+                        value={playerFilters.league}
+                        onChange={(e) => setPlayerFilters({ ...playerFilters, league: e.target.value })}
+                        className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="" className="bg-gray-900">All Leagues</option>
+                        {getUniqueLeagues().map(league => (
+                          <option key={league} value={league} className="bg-gray-900">{league}</option>
+                        ))}
+                      </select>
+                      
+                      <select
+                        value={playerFilters.category}
+                        onChange={(e) => setPlayerFilters({ ...playerFilters, category: e.target.value })}
+                        className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      >
+                        <option value="" className="bg-gray-900">All Categories</option>
+                        {getUniqueCategories().map(category => (
+                          <option key={category} value={category} className="bg-gray-900">{category}</option>
+                        ))}
                       </select>
                     </div>
-
-                    {(newUser.role === 'captain' || newUser.role === 'vice') && (
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">
-                          Team Assignment * 
-                          <span className="text-orange-300 text-xs ml-1">
-                            (Required for {newUser.role === 'vice' ? 'Vice Captains' : 'Captains'})
-                          </span>
-                        </label>
-                        <select
-                          value={newUser.teamName || ''}
-                          onChange={(e) => setNewUser({ ...newUser, teamName: e.target.value })}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="" className="bg-gray-900">Select a team</option>
-                          {availableTeams.map(team => (
-                            <option key={team.name} value={team.name} className="bg-gray-900">
-                              {team.name} ({team.league} - {team.format} - {team.category})
-                            </option>
-                          ))}
-                        </select>
-                        {newUser.teamName && (
-                          <div className="mt-2 p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
-                            <div className="text-orange-300 text-sm font-semibold">Selected Team:</div>
-                            <div className="text-orange-200 text-sm">
-                              {(() => {
-                                const team = availableTeams.find(t => t.name === newUser.teamName);
-                                return team ? `${team.name} - ${team.league} League (${team.format} ${team.category})` : newUser.teamName;
-                              })()}
+                  </div>
+                  
+                  {/* Player List */}
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {filteredPlayers.map(player => (
+                      <div
+                        key={player.id}
+                        onClick={() => handlePlayerSelect(player)}
+                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                          selectedPlayer?.id === player.id
+                            ? 'bg-orange-500/20 border-orange-500/50 text-white'
+                            : 'bg-white/5 border-white/10 hover:border-white/30 text-white/80 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h5 className="font-semibold">{player.name}</h5>
+                            <div className="text-sm opacity-80">{player.position}</div>
+                            <div className="text-xs opacity-60 mt-1">
+                              {player.teamName} • {player.league} • {player.category}
                             </div>
+                            {player.email && (
+                              <div className="text-xs opacity-60">{player.email}</div>
+                            )}
                           </div>
-                        )}
+                          {selectedPlayer?.id === player.id && (
+                            <CheckCircle size={20} className="text-orange-400" />
+                          )}
+                        </div>
                       </div>
-                    )}
-
-                    {newUser.role === 'member' && (
-                      <div>
-                        <label className="block text-sm font-medium text-white/90 mb-2">
-                          Team Assignment (Optional)
-                        </label>
-                        <select
-                          value={newUser.teamName || ''}
-                          onChange={(e) => setNewUser({ ...newUser, teamName: e.target.value })}
-                          className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                          <option value="" className="bg-gray-900">No team assignment</option>
-                          {availableTeams.map(team => (
-                            <option key={team.name} value={team.name} className="bg-gray-900">
-                              {team.name} ({team.league} - {team.format} - {team.category})
-                            </option>
-                          ))}
-                        </select>
+                    ))}
+                    
+                    {filteredPlayers.length === 0 && (
+                      <div className="text-center py-8 text-white/50">
+                        <Users size={32} className="mx-auto mb-2" />
+                        <p>No players found matching your filters</p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Security */}
+                {/* Role Assignment */}
                 <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
                   <h4 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                     <Shield size={20} />
-                    <span>Security</span>
+                    <span>Assign Role & Create Account</span>
                   </h4>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Password *</label>
-                      <input
-                        type="password"
-                        value={newUser.password}
-                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Enter password"
-                      />
-                    </div>
+                  {selectedPlayer ? (
+                    <div className="space-y-6">
+                      {/* Selected Player Info */}
+                      <div className="bg-orange-500/20 border border-orange-500/30 rounded-xl p-4">
+                        <h5 className="text-white font-semibold mb-2">Selected Player</h5>
+                        <div className="text-orange-200">
+                          <div className="font-medium">{selectedPlayer.name}</div>
+                          <div className="text-sm">{selectedPlayer.position} • {selectedPlayer.teamName}</div>
+                          <div className="text-sm">{selectedPlayer.league} {selectedPlayer.overs} {selectedPlayer.category}</div>
+                          {selectedPlayer.email && (
+                            <div className="text-sm">📧 {selectedPlayer.email}</div>
+                          )}
+                          {selectedPlayer.phone && (
+                            <div className="text-sm">📱 {selectedPlayer.phone}</div>
+                          )}
+                        </div>
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-white/90 mb-2">Confirm Password *</label>
-                      <input
-                        type="password"
-                        value={newUser.confirmPassword}
-                        onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        placeholder="Confirm password"
-                      />
+                      {/* Account Preview */}
+                      <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4">
+                        <h5 className="text-white font-semibold mb-2">Account Preview</h5>
+                        <div className="text-blue-200 text-sm space-y-1">
+                          <div><strong>Username:</strong> {selectedPlayer.name.toLowerCase().replace(/\s+/g, '.')}</div>
+                          <div><strong>Email:</strong> {selectedPlayer.email || `${selectedPlayer.name.toLowerCase().replace(/\s+/g, '.')}@email.com`}</div>
+                          <div><strong>Team Assignment:</strong> {selectedPlayer.teamName}</div>
+                        </div>
+                      </div>
+
+                      {/* Role Selection */}
+                      <div className="space-y-4">
+                        <h5 className="text-white font-semibold">Select Role for User Account</h5>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('member')}
+                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
+                        >
+                          <User size={20} />
+                          <div className="text-left">
+                            <div>Create as Member</div>
+                            <div className="text-sm opacity-80">Basic access to scheduler and team info</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('vice')}
+                          className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-xl font-semibold hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
+                        >
+                          <Star size={20} />
+                          <div className="text-left">
+                            <div>Create as Vice Captain</div>
+                            <div className="text-sm opacity-80">Team picker access and player management</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleCreateUserFromPlayer('captain')}
+                          className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 text-white p-4 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-700 transition-all transform hover:scale-[1.02] flex items-center space-x-3"
+                        >
+                          <Crown size={20} />
+                          <div className="text-left">
+                            <div>Create as Captain</div>
+                            <div className="text-sm opacity-80">Full team management and event creation</div>
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="text-center py-12 text-white/50">
+                      <Users size={48} className="mx-auto mb-4" />
+                      <p className="text-lg">Select a cricket player from the list</p>
+                      <p className="text-sm">Choose a player to create their user account with appropriate role</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
-              <div className="flex space-x-4 mt-8">
+              <div className="flex justify-end space-x-4 mt-8">
                 <button
                   onClick={() => {
                     setShowAddUserModal(false);
-                    setNewUser({
-                      username: '',
-                      name: '',
-                      email: '',
-                      role: 'member',
+                    setSelectedPlayer(null);
+                    setPlayerFilters({
+                      search: '',
                       teamName: '',
-                      password: '',
-                      confirmPassword: ''
+                      league: '',
+                      category: ''
                     });
                   }}
-                  className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
+                  className="bg-white/10 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleAddUser}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-green-700 transition-all"
-                >
-                  Create User
                 </button>
               </div>
             </div>

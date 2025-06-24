@@ -8,6 +8,7 @@ import Contact from './components/Pages/Contact';
 import Scheduler from './components/Pages/Scheduler';
 import TeamPicker from './components/Pages/TeamPicker';
 import Admin from './components/Pages/Admin';
+import Notifications from './components/Pages/Notifications';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -27,6 +28,8 @@ function AppContent() {
         return hasPermission(['member']) ? <Scheduler /> : <Home onNavigate={setCurrentPage} />;
       case 'teampicker':
         return hasPermission(['vice', 'captain']) ? <TeamPicker /> : <Home onNavigate={setCurrentPage} />;
+      case 'notifications':
+        return hasPermission(['captain', 'admin']) ? <Notifications /> : <Home onNavigate={setCurrentPage} />;
       case 'admin':
         return hasPermission(['admin']) ? <Admin /> : <Home onNavigate={setCurrentPage} />;
       default:
